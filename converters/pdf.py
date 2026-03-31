@@ -15,6 +15,7 @@ Images are embedded as base64 data-URIs so the HTML/JATS is self-contained.
 
 import base64
 import os
+import re
 import tempfile
 from html import escape
 import fitz
@@ -23,6 +24,44 @@ import pdfplumber
 from converters.html_wrap import wrap
 
 _HEADING_WIDTH_RATIO = 0.6
+
+# Fraction of page height considered a header/footer margin zone.
+_MARGIN_RATIO = 0.08
+
+# Patterns that strongly suggest a line is a page number.
+# Must match the *entire* stripped line (anchored with ^ and $).
+_PAGE_NUM_RE = re.compile(
+    r"^\s*"
+    r"("
+    r"\d{1,4}"                           # bare integer: 1 … 9999
+    r"|[ivxlcdmIVXLCDM]{1,8}"           # roman numerals: i, xiv, XIV
+    r"|page\.?\s+\d{1,4}"               # "Page 1" / "Page. 1"
+    r"|\d{1,4}\s+of\s+\d{1,4}"         # "1 of 10"
+    r"|page\.?\s+\d{1,4}\s+of\s+\d{1,4}"  # "Page 1 of 10"
+    r"|[-–—|·•]\s*\d{1,4}\s*[-–—|·•]"  # "- 1 -" / "| 42 |"
+    r")"
+    r"\s*$",
+    re.IGNORECASE,
+)
+
+
+def _is_page_number(text: str, y: float, page_height: float) -> bool:
+    """Return True when a line is almost certainly a page number.
+
+    Both conditions must hold:
+    1. The line's top-y sits inside the top or bottom margin zone.
+    2. The line's text matches a known page-number pattern.
+
+    Requiring both conditions avoids stripping legitimate header/footer content
+    such as journal titles or author names that also appear in the margin area.
+    """
+    in_margin = (
+        y < page_height * _MARGIN_RATIO
+        or y > page_height * (1 - _MARGIN_RATIO)
+    )
+    if not in_margin:
+        return False
+    return bool(_PAGE_NUM_RE.match(text.strip()))
 
 
 # ---------------------------------------------------------------------------
@@ -237,6 +276,9 @@ def _extract_elements(pdf_path: str) -> list[dict]:
                     ) / len(line_words)
                     line_width = line_words[-1]["x1"] - line_words[0]["x0"]
                     width_ratio = line_width / page_width
+                    if _is_page_number(text, y_key, float(plumber_page.height)):
+                        continue
+
                     is_heading = (
                         avg_size > median_size * 1.15
                         and width_ratio < _HEADING_WIDTH_RATIO
