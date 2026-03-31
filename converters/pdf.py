@@ -221,29 +221,25 @@ def _extract_elements(pdf_path: str) -> list[dict]:
                     })
 
             # ----------------------------------------------------------------
-            # 2. Images via pymupdf — blocks are already in reading order
+            # 2. Images via pymupdf
+            #    get_text("dict") image blocks often have xref=None, so we
+            #    use get_images(full=True) for reliable xrefs and
+            #    get_image_bbox() for the on-page position.
             # ----------------------------------------------------------------
-            fitz_blocks = fitz_page.get_text("dict", sort=True)["blocks"]
-            image_top_ys: list[float] = []
-            for block in fitz_blocks:
-                if block["type"] != 1:  # 1 = image block
-                    continue
-                xref = block.get("xref", 0)
-                if not xref:
-                    continue
+            for img_index, img_item in enumerate(fitz_page.get_images(full=True)):
+                xref = img_item[0]
                 try:
+                    rect = fitz_page.get_image_bbox(img_item)
                     img_data = fitz_doc.extract_image(xref)
                 except Exception:
                     continue
                 b64 = base64.b64encode(img_data["image"]).decode()
-                y = block["bbox"][1]
-                image_top_ys.append(y)
                 page_elements.append({
                     "type": "image",
                     "b64": b64,
                     "ext": img_data["ext"],
                     "alt": f"Figure on page {page_num + 1}",
-                    "y": y,
+                    "y": rect.y0,
                 })
 
             # ----------------------------------------------------------------
