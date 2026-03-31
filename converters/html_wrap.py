@@ -35,7 +35,7 @@ _CSS = """\
   }
 
   /* ── Article container ── */
-  article, body > * {
+  article {
     max-width: 72ch;
     margin-inline: auto;
   }
@@ -158,7 +158,9 @@ def wrap(html_fragment: str, title: str = "", lang: str = "en") -> str:
   </style>
 </head>
 <body>
+<article>
 {html_fragment}
+</article>
 </body>
 </html>
 """
