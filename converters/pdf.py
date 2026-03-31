@@ -100,31 +100,42 @@ def _is_page_number(text: str, y: float, page_height: float) -> bool:
 _RUNNING_TEXT_THRESHOLD = 0.40
 
 
-def _find_running_text(pdf_path: str) -> frozenset[str]:
-    """Pre-scan all pages and return text lines that repeat in the margin zone.
+class _RunningText:
+    """Holds repeating header and footer lines detected across pages."""
+    __slots__ = ("headers", "footers")
+
+    def __init__(self, headers: frozenset[str], footers: frozenset[str]) -> None:
+        self.headers = headers  # repeating lines in the top margin zone
+        self.footers = footers  # repeating lines in the bottom margin zone
+
+
+def _find_running_text(pdf_path: str) -> _RunningText:
+    """Pre-scan all pages and identify repeating header and footer lines.
 
     Running headers/footers appear identically on many pages; footnotes are
-    unique per page.  Any margin-zone line present on >= 40 % of pages
-    (minimum 2) is treated as boilerplate and returned for suppression.
+    unique per page and are therefore never flagged.
 
-    The page-number regex is excluded here because _is_page_number() already
-    handles those independently.
+    Headers and footers are tracked separately so that different suppression
+    rules can be applied:
+      - Repeating top-margin text is kept on page 1, removed from later pages.
+      - Repeating bottom-margin text is removed from all pages including page 1.
     """
     from collections import Counter
 
-    line_counts: Counter[str] = Counter()
+    header_counts: Counter[str] = Counter()
+    footer_counts: Counter[str] = Counter()
 
     with pdfplumber.open(pdf_path) as pdf:
         n_pages = len(pdf.pages)
         if n_pages < 2:
-            return frozenset()
+            return _RunningText(frozenset(), frozenset())
 
         for page in pdf.pages:
             page_height = float(page.height)
             words = page.extract_words()
-            seen_this_page: set[str] = set()
+            seen_header: set[str] = set()
+            seen_footer: set[str] = set()
 
-            # Group words into lines, margin zone only.
             raw_lines: dict[float, list] = {}
             for w in words:
                 y = float(w["top"])
@@ -135,20 +146,27 @@ def _find_running_text(pdf_path: str) -> frozenset[str]:
                     key = round(y, 0)
                     raw_lines.setdefault(key, []).append(w)
 
-            for line_words in raw_lines.values():
+            for y_key, line_words in raw_lines.items():
                 line_words.sort(key=lambda w: w["x0"])
                 text = " ".join(w["text"] for w in line_words).strip()
-                # Skip blanks and lines already caught by page-number logic.
                 if not text or _PAGE_NUM_RE.match(text):
                     continue
-                # Count each unique line only once per page so a line that
-                # appears twice on one page doesn't inflate the count.
-                if text not in seen_this_page:
-                    seen_this_page.add(text)
-                    line_counts[text] += 1
+
+                in_top = y_key < page_height * _MARGIN_RATIO
+                if in_top:
+                    if text not in seen_header:
+                        seen_header.add(text)
+                        header_counts[text] += 1
+                else:
+                    if text not in seen_footer:
+                        seen_footer.add(text)
+                        footer_counts[text] += 1
 
     threshold = max(2, int(n_pages * _RUNNING_TEXT_THRESHOLD))
-    return frozenset(text for text, count in line_counts.items() if count >= threshold)
+    return _RunningText(
+        headers=frozenset(t for t, c in header_counts.items() if c >= threshold),
+        footers=frozenset(t for t, c in footer_counts.items() if c >= threshold),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -363,14 +381,15 @@ def _extract_elements(pdf_path: str) -> list[dict]:
                     page_height = float(plumber_page.height)
                     if _is_page_number(text, y_key, page_height):
                         continue
-                    # Suppress running headers/footers detected in the pre-scan.
-                    # Only suppress in the margin zone so an identical phrase that
-                    # happens to appear in the body is not incorrectly stripped.
-                    in_margin = (
-                        y_key < page_height * _MARGIN_RATIO
-                        or y_key > page_height * (1 - _MARGIN_RATIO)
-                    )
-                    if in_margin and text in running_text:
+
+                    in_top = y_key < page_height * _MARGIN_RATIO
+                    in_bottom = y_key > page_height * (1 - _MARGIN_RATIO)
+
+                    # Repeating top-margin text: keep on page 1, drop thereafter.
+                    if in_top and page_num > 0 and text in running_text.headers:
+                        continue
+                    # Repeating bottom-margin text: drop on every page.
+                    if in_bottom and text in running_text.footers:
                         continue
 
                     is_heading = (
