@@ -30,6 +30,36 @@ _MARGIN_RATIO = 0.08
 
 # Patterns that strongly suggest a line is a page number.
 # Must match the *entire* stripped line (anchored with ^ and $).
+# Matches http/https URLs in plain text.
+# Stops at whitespace and characters that are almost never part of a URL but
+# commonly appear immediately after one in prose (closing brackets, quotes, etc.)
+_URL_RE = re.compile(r"https?://[^\s<>\"')\]]+")
+
+# Trailing punctuation that belongs to the sentence, not the URL.
+_URL_TRAIL_RE = re.compile(r"[.,;:!?)]+$")
+
+
+def _linkify(text: str) -> str:
+    """Return HTML with bare http/https URLs wrapped in <a> tags.
+
+    Non-URL segments are HTML-escaped normally.  URL segments are used as both
+    the href and the visible label, with trailing sentence punctuation stripped
+    from the URL (but left in the surrounding text).
+    """
+    parts: list[str] = []
+    last = 0
+    for m in _URL_RE.finditer(text):
+        url = _URL_TRAIL_RE.sub("", m.group())   # strip trailing punctuation
+        url_end = m.start() + len(url)
+
+        parts.append(escape(text[last:m.start()]))          # text before URL
+        parts.append(f'<a href="{escape(url)}">{escape(url)}</a>')
+        last = url_end
+
+    parts.append(escape(text[last:]))                        # text after last URL
+    return "".join(parts)
+
+
 _PAGE_NUM_RE = re.compile(
     r"^\s*"
     r"("
@@ -369,7 +399,7 @@ def pdf_to_html(file_bytes: bytes, lang: str = "en") -> str:
     for el in elements:
         if el["type"] in ("h2", "h3", "p"):
             tag = el["type"]
-            parts.append(f"<{tag}>{escape(el['text'])}</{tag}>")
+            parts.append(f"<{tag}>{_linkify(el['text'])}</{tag}>")
         elif el["type"] == "table":
             parts.append(_table_to_html(el["rows"]))
         elif el["type"] == "image":
