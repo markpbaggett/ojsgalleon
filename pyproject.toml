@@ -1,0 +1,15 @@
+[project]
+name = "ojsgalleon"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.135.2",
+    "mammoth>=1.12.0",
+    "pdfplumber>=0.11.9",
+    "pypandoc>=1.17",
+    "pymupdf>=1.24.0",
+    "python-multipart>=0.0.20",
+    "uvicorn[standard]>=0.34.0",
+]
