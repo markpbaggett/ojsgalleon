@@ -1,11 +1,33 @@
 """Converts DOCX using mammoth (→ HTML) and pypandoc (→ JATS XML)."""
 
 import os
+import re
 import tempfile
 import mammoth
 import pypandoc
 
 from converters.html_wrap import wrap
+
+# Matches any <th> tag (with optional attributes) and its content.
+_TH_RE = re.compile(r"<th(\s[^>]*)?>(?P<content>.*?)</th>", re.IGNORECASE | re.DOTALL)
+
+
+def _fix_table_headers(html: str) -> str:
+    """Post-process mammoth HTML to address empty/missing-scope <th> elements.
+
+    - Empty <th> → <td> (empty headers fail ADA Title II / WCAG 1.3.1)
+    - Non-empty <th> → adds scope="col" if not already present
+    """
+    def _replace_th(m: re.Match) -> str:
+        attrs = m.group(1) or ""
+        content = m.group("content").strip()
+        if not content:
+            return f"<td></td>"
+        if "scope=" not in attrs:
+            attrs = ' scope="col"' + attrs
+        return f"<th{attrs}>{content}</th>"
+
+    return _TH_RE.sub(_replace_th, html)
 
 # Map common Word paragraph styles to semantic HTML elements.
 # Extend this as you encounter journal-specific style names.
@@ -35,7 +57,8 @@ def docx_to_html(file_bytes: bytes, lang: str = "en") -> tuple[str, list[str]]:
         with open(tmp_path, "rb") as fh:
             result = mammoth.convert_to_html(fh, style_map=_STYLE_MAP)
         warnings = [str(m) for m in result.messages]
-        return wrap(result.value, lang=lang), warnings
+        fixed = _fix_table_headers(result.value)
+        return wrap(fixed, lang=lang), warnings
     finally:
         os.unlink(tmp_path)
 

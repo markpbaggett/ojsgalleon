@@ -37,18 +37,39 @@ def _word_in_bboxes(word_top: float, bboxes: list[tuple]) -> bool:
     return any(bbox[1] <= word_top <= bbox[3] for bbox in bboxes)
 
 
+def _has_header(row: list) -> bool:
+    """Return True if any cell in *row* contains non-whitespace text."""
+    return any(str(cell or "").strip() for cell in row)
+
+
 def _table_to_html(rows: list[list]) -> str:
-    """Render extracted table rows as an HTML <table>."""
+    """Render extracted table rows as an accessible HTML <table>.
+
+    The first row is treated as a header only when it contains at least one
+    non-empty cell.  Each <th> gets scope="col" (WCAG 1.3.1).  Empty cells
+    in a header row are rendered as <td> instead to avoid empty <th> elements
+    that fail ADA Title II / WCAG 2.1 AA audits.
+    """
     if not rows:
         return ""
+
     lines = ["<table>"]
-    # Always treat the first row as header (I might regret this later).
-    lines.append("  <thead><tr>")
-    for cell in rows[0]:
-        lines.append(f"    <th>{escape(str(cell or ''))}</th>")
-    lines.append("  </tr></thead>")
+
+    if _has_header(rows[0]):
+        lines.append("  <thead><tr>")
+        for cell in rows[0]:
+            text = escape(str(cell or "").strip())
+            if text:
+                lines.append(f'    <th scope="col">{text}</th>')
+            else:
+                lines.append("    <td></td>")
+        lines.append("  </tr></thead>")
+        body_rows = rows[1:]
+    else:
+        body_rows = rows
+
     lines.append("  <tbody>")
-    for row in rows[1:]:
+    for row in body_rows:
         lines.append("  <tr>")
         for cell in row:
             lines.append(f"    <td>{escape(str(cell or ''))}</td>")
@@ -59,16 +80,31 @@ def _table_to_html(rows: list[list]) -> str:
 
 
 def _table_to_jats(rows: list[list]) -> str:
-    """Render extracted table rows as a JATS <table-wrap>."""
+    """Render extracted table rows as a JATS <table-wrap>.
+
+    Same header-detection logic as _table_to_html: only emit <thead> when the
+    first row has content, and skip empty <th> elements.
+    """
     if not rows:
         return ""
+
     lines = ["<table-wrap>", "  <table>"]
-    lines.append("    <thead><tr>")
-    for cell in rows[0]:
-        lines.append(f"      <th>{escape(str(cell or ''))}</th>")
-    lines.append("    </tr></thead>")
+
+    if _has_header(rows[0]):
+        lines.append("    <thead><tr>")
+        for cell in rows[0]:
+            text = escape(str(cell or "").strip())
+            if text:
+                lines.append(f"      <th>{text}</th>")
+            else:
+                lines.append("      <td></td>")
+        lines.append("    </tr></thead>")
+        body_rows = rows[1:]
+    else:
+        body_rows = rows
+
     lines.append("    <tbody>")
-    for row in rows[1:]:
+    for row in body_rows:
         lines.append("    <tr>")
         for cell in row:
             lines.append(f"      <td>{escape(str(cell or ''))}</td>")
