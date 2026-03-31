@@ -143,58 +143,134 @@ def _extract_elements(pdf_path: str) -> list[dict]:
 
             # ----------------------------------------------------------------
             # 3. Text via pdfplumber, excluding table regions
+            #    Lines are grouped by their top-y coordinate, then paragraph
+            #    breaks are inferred from vertical gaps between lines.
             # ----------------------------------------------------------------
-            words = plumber_page.extract_words(extra_attrs=["size"])
+            words = plumber_page.extract_words(extra_attrs=["size", "bottom"])
             if words:
                 sizes = sorted(float(w.get("size", 12) or 12) for w in words)
                 median_size = sizes[len(sizes) // 2]
                 page_width = float(plumber_page.width)
 
-                lines: dict[float, list[dict]] = {}
+                # Group words into lines keyed by rounded top-y.
+                raw_lines: dict[float, list[dict]] = {}
                 for w in words:
                     if _word_in_bboxes(float(w["top"]), table_bboxes):
                         continue
                     key = round(float(w["top"]), 0)
-                    lines.setdefault(key, []).append(w)
+                    raw_lines.setdefault(key, []).append(w)
 
-                for y_key, line_words in sorted(lines.items()):
+                sorted_lines = sorted(raw_lines.items())  # [(y_top, [words])]
+
+                # Bottom y of each line = max word-bottom in that line.
+                line_bottoms = {
+                    y: max(float(w.get("bottom", y + 12)) for w in wds)
+                    for y, wds in sorted_lines
+                }
+
+                # Collect inter-line gaps to find the "normal" line spacing.
+                gaps = []
+                for i in range(1, len(sorted_lines)):
+                    prev_y = sorted_lines[i - 1][0]
+                    curr_y = sorted_lines[i][0]
+                    gap = curr_y - line_bottoms[prev_y]
+                    if gap > 0:
+                        gaps.append(gap)
+
+                if gaps:
+                    gaps.sort()
+                    median_gap = gaps[len(gaps) // 2]
+                else:
+                    median_gap = 2.0
+                # A gap larger than this threshold means a new paragraph.
+                para_threshold = median_gap * 1.6
+
+                # Walk lines, accumulating body text into paragraphs and
+                # flushing whenever a heading or a large gap is encountered.
+                para_lines: list[str] = []
+                para_y: float = 0.0
+
+                for i, (y_key, line_words) in enumerate(sorted_lines):
                     line_words.sort(key=lambda w: w["x0"])
                     text = " ".join(w["text"] for w in line_words).strip()
                     if not text:
                         continue
+
                     avg_size = sum(
                         float(w.get("size", 12) or 12) for w in line_words
                     ) / len(line_words)
                     line_width = line_words[-1]["x1"] - line_words[0]["x0"]
                     width_ratio = line_width / page_width
+                    is_heading = (
+                        avg_size > median_size * 1.15
+                        and width_ratio < _HEADING_WIDTH_RATIO
+                    )
 
-                    if avg_size > median_size * 1.15 and width_ratio < _HEADING_WIDTH_RATIO:
+                    if is_heading:
+                        # Flush any pending paragraph before the heading.
+                        if para_lines:
+                            page_elements.append({
+                                "type": "p",
+                                "text": " ".join(para_lines),
+                                "y": para_y,
+                            })
+                            para_lines = []
                         tag = "h2" if avg_size > median_size * 1.4 else "h3"
+                        page_elements.append({"type": tag, "text": text, "y": y_key})
                     else:
-                        tag = "p"
-                    page_elements.append({"type": tag, "text": text, "y": y_key})
+                        # Check whether the gap from the previous line is large
+                        # enough to signal a paragraph break.
+                        if i > 0 and para_lines:
+                            prev_y = sorted_lines[i - 1][0]
+                            gap = y_key - line_bottoms[prev_y]
+                            if gap > para_threshold:
+                                page_elements.append({
+                                    "type": "p",
+                                    "text": " ".join(para_lines),
+                                    "y": para_y,
+                                })
+                                para_lines = []
+
+                        if not para_lines:
+                            para_y = y_key
+                        para_lines.append(text)
+
+                # Flush the last paragraph on the page.
+                if para_lines:
+                    page_elements.append({
+                        "type": "p",
+                        "text": " ".join(para_lines),
+                        "y": para_y,
+                    })
+
             else:
                 # Fallback: plain text extraction for image-only pages.
+                # Split on blank lines to preserve paragraph breaks.
                 raw = plumber_page.extract_text() or ""
+                current: list[str] = []
                 for i, line in enumerate(raw.splitlines()):
-                    line = line.strip()
-                    if line:
-                        page_elements.append({"type": "p", "text": line, "y": float(i)})
+                    stripped = line.strip()
+                    if stripped:
+                        current.append(stripped)
+                    elif current:
+                        page_elements.append({
+                            "type": "p",
+                            "text": " ".join(current),
+                            "y": float(i),
+                        })
+                        current = []
+                if current:
+                    page_elements.append({
+                        "type": "p",
+                        "text": " ".join(current),
+                        "y": float(len(raw.splitlines())),
+                    })
 
             page_elements.sort(key=lambda e: e["y"])
             all_elements.extend(page_elements)
 
     fitz_doc.close()
-
-    # Merge consecutive body-text lines into single paragraph blocks.
-    merged: list[dict] = []
-    for el in all_elements:
-        if el["type"] == "p" and merged and merged[-1]["type"] == "p":
-            merged[-1]["text"] += " " + el["text"]
-        else:
-            merged.append(el)
-
-    return merged
+    return all_elements
 
 
 # ---------------------------------------------------------------------------
