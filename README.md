@@ -14,6 +14,17 @@ Convert DOCX and PDF files to structured HTML or JATS XML for additional galleys
 - Output HTML always includes `<html lang="...">` and a `<title>` (WCAG 2.4.2 / 3.1.1)
 - Self-contained output — no external assets required
 
+## Other Features to Know:
+
+This tries to strip out headers or footers that are repeated on every page of a PDF.
+If a journal puts running headers unusually deep into the text area, increase `_MARGIN_RATIO`. If headers only appear on
+some / ~half the pages, lower `_RUNNING_TEXT_THRESHOLD`.
+
+| Constant                   | Default | Effect                                                     |
+|----------------------------|---------|------------------------------------------------------------|
+| _MARGIN_RATIO              | 0.08    | Height of the margin zone (8% top + 8% bottom)             |
+| _RUNNING_TEXT_THRESHOLD    | 0.40    | Fraction of pages a line must appear on to be suppressed   |
+
 ## Requirements
 
 - Python ≥ 3.14

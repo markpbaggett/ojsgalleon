@@ -94,6 +94,63 @@ def _is_page_number(text: str, y: float, page_height: float) -> bool:
     return bool(_PAGE_NUM_RE.match(text.strip()))
 
 
+# Minimum fraction of pages a margin line must appear on to be considered a
+# running header/footer.  40% works well for typical journal articles; lower
+# it if you encounter PDFs where headers only appear on most but not all pages.
+_RUNNING_TEXT_THRESHOLD = 0.40
+
+
+def _find_running_text(pdf_path: str) -> frozenset[str]:
+    """Pre-scan all pages and return text lines that repeat in the margin zone.
+
+    Running headers/footers appear identically on many pages; footnotes are
+    unique per page.  Any margin-zone line present on >= 40 % of pages
+    (minimum 2) is treated as boilerplate and returned for suppression.
+
+    The page-number regex is excluded here because _is_page_number() already
+    handles those independently.
+    """
+    from collections import Counter
+
+    line_counts: Counter[str] = Counter()
+
+    with pdfplumber.open(pdf_path) as pdf:
+        n_pages = len(pdf.pages)
+        if n_pages < 2:
+            return frozenset()
+
+        for page in pdf.pages:
+            page_height = float(page.height)
+            words = page.extract_words()
+            seen_this_page: set[str] = set()
+
+            # Group words into lines, margin zone only.
+            raw_lines: dict[float, list] = {}
+            for w in words:
+                y = float(w["top"])
+                if (
+                    y < page_height * _MARGIN_RATIO
+                    or y > page_height * (1 - _MARGIN_RATIO)
+                ):
+                    key = round(y, 0)
+                    raw_lines.setdefault(key, []).append(w)
+
+            for line_words in raw_lines.values():
+                line_words.sort(key=lambda w: w["x0"])
+                text = " ".join(w["text"] for w in line_words).strip()
+                # Skip blanks and lines already caught by page-number logic.
+                if not text or _PAGE_NUM_RE.match(text):
+                    continue
+                # Count each unique line only once per page so a line that
+                # appears twice on one page doesn't inflate the count.
+                if text not in seen_this_page:
+                    seen_this_page.add(text)
+                    line_counts[text] += 1
+
+    threshold = max(2, int(n_pages * _RUNNING_TEXT_THRESHOLD))
+    return frozenset(text for text, count in line_counts.items() if count >= threshold)
+
+
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
@@ -196,6 +253,7 @@ def _extract_elements(pdf_path: str) -> list[dict]:
       - {"type": "table", "rows": [[str, ...], ...]}
       - {"type": "image", "b64": str, "ext": str, "alt": str}
     """
+    running_text = _find_running_text(pdf_path)
     all_elements: list[dict] = []
 
     fitz_doc = fitz.open(pdf_path)
@@ -302,7 +360,17 @@ def _extract_elements(pdf_path: str) -> list[dict]:
                     ) / len(line_words)
                     line_width = line_words[-1]["x1"] - line_words[0]["x0"]
                     width_ratio = line_width / page_width
-                    if _is_page_number(text, y_key, float(plumber_page.height)):
+                    page_height = float(plumber_page.height)
+                    if _is_page_number(text, y_key, page_height):
+                        continue
+                    # Suppress running headers/footers detected in the pre-scan.
+                    # Only suppress in the margin zone so an identical phrase that
+                    # happens to appear in the body is not incorrectly stripped.
+                    in_margin = (
+                        y_key < page_height * _MARGIN_RATIO
+                        or y_key > page_height * (1 - _MARGIN_RATIO)
+                    )
+                    if in_margin and text in running_text:
                         continue
 
                     is_heading = (
