@@ -43,5 +43,14 @@ Repository = "https://github.com/tamu-dc-labs/ojsgalleon"
 [tool.hatch.build.targets.wheel]
 packages = ["src/ojsgalleon"]
 
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "fixtures/",
+    "uv.lock",
+    ".idea/",
+    "paper.html",
+    "paper.xml",
+]
+
 [tool.uv]
 dev-dependencies = []
