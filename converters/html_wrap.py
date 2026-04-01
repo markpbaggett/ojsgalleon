@@ -60,14 +60,14 @@ _CSS = """\
 
   /* ── Article card ── */
   article {
-    max-width: 74ch;
+    max-width: 960px;          /* ~letter-page width at screen resolution    */
     margin-inline: auto;
     background: var(--bg-card);
     border-radius: 3px;
     box-shadow: var(--shadow-card);
     /* Thin gold accent bar across the top */
     border-top: 4px solid var(--gold);
-    padding: 3.5rem 4rem 4rem;
+    padding: 3.5rem 5rem 4rem;
   }
 
   /* ── Headings ── */
@@ -209,8 +209,11 @@ _CSS = """\
   a:hover { color: var(--gold); }
 
   /* ── Responsive — collapse padding on small screens ── */
+  @media (max-width: 1020px) {
+    article { padding: 2.5rem 3rem 3rem; }
+  }
   @media (max-width: 640px) {
-    article { padding: 2rem 1.25rem 2.5rem; }
+    article { padding: 1.5rem 1.25rem 2rem; }
     h1.article-title { font-size: 1.5rem; }
   }
 
