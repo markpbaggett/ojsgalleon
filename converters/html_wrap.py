@@ -24,113 +24,207 @@ _CSS = """\
   /* ── Reset ── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* ── Base ── */
-  body {
-    font-family: "Georgia", "Times New Roman", serif;
-    font-size: 1.05rem;
-    line-height: 1.75;
-    color: #1a1a1a;
-    background: #f9f7f4;
-    padding: 2rem 1rem 4rem;
+  /* ── Design tokens ── */
+  :root {
+    --ink:        #1c2b3a;   /* near-black with a cool undertone            */
+    --ink-light:  #4a5568;   /* secondary text                              */
+    --accent:     #2c5282;   /* ink navy — headings, links, rule accents    */
+    --accent-mid: #4a7fb5;   /* lighter accent for borders                  */
+    --rule:       #d6dde6;   /* subtle dividers                             */
+    --bg-page:    #dde3ea;   /* cool warm-gray page background              */
+    --bg-card:    #ffffff;   /* article card surface                        */
+    --bg-tint:    #f0f4f8;   /* abstract / even-row tint                    */
+    --gold:       #b7860b;   /* warm accent for abstract label, top bar     */
+    --font-serif: "Georgia", "Times New Roman", serif;
+    --shadow-card: 0 2px 8px rgba(0,0,0,.08), 0 8px 32px rgba(0,0,0,.06);
   }
 
-  /* ── Article container ── */
+  /* ── Page shell ── */
+  body {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;    /* ≈ 17px — comfortable for long-form reading  */
+    line-height: 1.8;
+    color: var(--ink);
+    background-color: var(--bg-page);
+    /* Subtle linen-like texture via a repeating gradient */
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,.03) 2px,
+      rgba(255,255,255,.03) 4px
+    );
+    min-height: 100vh;
+    padding: 3rem 1rem 6rem;
+  }
+
+  /* ── Article card ── */
   article {
-    max-width: 72ch;
+    max-width: 74ch;
     margin-inline: auto;
+    background: var(--bg-card);
+    border-radius: 3px;
+    box-shadow: var(--shadow-card);
+    /* Thin gold accent bar across the top */
+    border-top: 4px solid var(--gold);
+    padding: 3.5rem 4rem 4rem;
   }
 
   /* ── Headings ── */
   h1, h2, h3, h4 {
-    font-family: "Georgia", serif;
-    line-height: 1.25;
-    margin-top: 2.25rem;
-    margin-bottom: 0.6rem;
-    color: #111;
+    font-family: var(--font-serif);
+    color: var(--accent);
+    line-height: 1.2;
+    font-weight: normal;       /* Georgia italic/bold weight managed per level */
   }
-  h1.article-title { font-size: 1.9rem; margin-top: 1rem; border-bottom: 2px solid #c8b89a; padding-bottom: 0.4rem; }
-  h2 { font-size: 1.35rem; border-bottom: 1px solid #ddd; padding-bottom: 0.2rem; }
-  h3 { font-size: 1.1rem; font-style: italic; }
-  h4 { font-size: 1rem; }
+
+  h1.article-title {
+    font-size: 2rem;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    font-variant: small-caps;
+    letter-spacing: 0.06em;
+    margin-top: 2.5rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  h3 {
+    font-size: 1.05rem;
+    font-style: italic;
+    margin-top: 1.75rem;
+    margin-bottom: 0.35rem;
+    color: var(--ink-light);
+  }
+
+  h4 {
+    font-size: 1rem;
+    font-style: italic;
+    margin-top: 1.25rem;
+    margin-bottom: 0.25rem;
+    color: var(--ink-light);
+  }
 
   /* ── Body text ── */
-  p { margin-top: 0.9rem; }
-  p + p { text-indent: 1.5em; margin-top: 0; }
+  p {
+    margin-top: 1rem;
+    text-align: justify;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+  /* Indent continuation paragraphs — classic book convention */
+  p + p {
+    text-indent: 1.75em;
+    margin-top: 0;
+  }
+  /* But never indent the first paragraph after a heading */
+  h1 + p, h2 + p, h3 + p, h4 + p { text-indent: 0; }
 
   /* ── Abstract ── */
   div.abstract {
-    background: #f0ece4;
-    border-left: 4px solid #c8b89a;
-    padding: 1rem 1.25rem;
-    margin: 1.5rem 0;
-    font-size: 0.97rem;
+    background: var(--bg-tint);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--gold);
+    border-radius: 0 3px 3px 0;
+    padding: 1.25rem 1.5rem;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
   }
-  div.abstract p { text-indent: 0; }
+  div.abstract p { text-indent: 0; margin-top: 0.5rem; }
+  div.abstract p:first-child { margin-top: 0; }
   div.abstract::before {
     content: "Abstract";
     display: block;
-    font-weight: bold;
     font-variant: small-caps;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.4rem;
-    color: #555;
+    letter-spacing: 0.1em;
+    font-size: 0.78rem;
+    color: var(--gold);
+    margin-bottom: 0.6rem;
   }
 
   /* ── Tables ── */
   table {
     width: 100%;
     border-collapse: collapse;
-    margin: 1.75rem 0;
-    font-size: 0.93rem;
-    background: #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    margin: 2rem 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    overflow: hidden;   /* clip thead corner radius */
   }
   th, td {
-    padding: 0.55rem 0.85rem;
+    padding: 0.6rem 1rem;
     text-align: left;
     vertical-align: top;
-    border: 1px solid #ddd;
   }
   thead th {
-    background: #3a3a3a;
+    background: var(--accent);
     color: #fff;
-    font-weight: 600;
-    font-size: 0.88rem;
-    letter-spacing: 0.03em;
+    font-family: var(--font-serif);
+    font-variant: small-caps;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    font-weight: normal;
+    border-bottom: 2px solid var(--accent-mid);
   }
-  tbody tr:nth-child(even) td { background: #f5f3ef; }
-  tbody tr:hover td { background: #eae6de; }
+  tbody tr { border-bottom: 1px solid var(--rule); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) td { background: var(--bg-tint); }
+  tbody tr:hover td { background: #e6edf5; transition: background 0.15s; }
 
   /* ── Figures & images ── */
   figure {
-    margin: 2rem auto;
+    margin: 2.5rem 0;
     text-align: center;
   }
   figure img {
     max-width: 100%;
     height: auto;
-    border: 1px solid #ddd;
+    border: 1px solid var(--rule);
     border-radius: 3px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.10);
+    box-shadow: 0 2px 12px rgba(0,0,0,.10);
   }
   figcaption {
-    margin-top: 0.5rem;
-    font-size: 0.88rem;
-    color: #555;
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--ink-light);
     font-style: italic;
+    line-height: 1.5;
   }
 
   /* ── Inline ── */
-  strong { font-weight: 700; }
+  strong { font-weight: bold; color: var(--ink); }
   em     { font-style: italic; }
-  a      { color: #7a4419; }
-  a:hover{ text-decoration: underline; }
+  a      { color: var(--accent); text-underline-offset: 3px; }
+  a:hover { color: var(--gold); }
+
+  /* ── Responsive — collapse padding on small screens ── */
+  @media (max-width: 640px) {
+    article { padding: 2rem 1.25rem 2.5rem; }
+    h1.article-title { font-size: 1.5rem; }
+  }
 
   /* ── Print ── */
   @media print {
-    body { background: #fff; font-size: 11pt; }
-    table { box-shadow: none; }
-    figure img { box-shadow: none; }
+    body { background: #fff; padding: 0; }
+    article {
+      box-shadow: none;
+      border-top: none;
+      padding: 0;
+      max-width: 100%;
+    }
+    a { color: var(--ink); text-decoration: none; }
+    tbody tr:hover td { background: none; }
   }
 """
 
