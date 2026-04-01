@@ -8,12 +8,15 @@ from fastapi.responses import JSONResponse
 
 from ojsgalleon.converters.docx import docx_to_html, docx_to_jats
 from ojsgalleon.converters.pdf import pdf_to_html, pdf_to_jats
+from ojsgalleon.ui import router as ui_router
 
 app = FastAPI(
     title="OJS Galleon",
     description="Convert DOCX and PDF files to structured HTML or JATS XML for Open Journal Systems.",
     version="0.1.0",
 )
+
+app.include_router(ui_router)
 
 SUPPORTED_EXTENSIONS = {".docx", ".pdf"}
 
