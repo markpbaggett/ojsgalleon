@@ -6,8 +6,8 @@ from pathlib import Path
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 
-from converters.docx import docx_to_html, docx_to_jats
-from converters.pdf import pdf_to_html, pdf_to_jats
+from ojsgalleon.converters.docx import docx_to_html, docx_to_jats
+from ojsgalleon.converters.pdf import pdf_to_html, pdf_to_jats
 
 app = FastAPI(
     title="OJS Galleon",
@@ -75,7 +75,7 @@ async def convert_document(
     )
 
 
-if __name__ == "__main__":
+def serve():
+    """Entry point for `ojsgalleon serve`."""
     import uvicorn
-
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("ojsgalleon.api:app", host="0.0.0.0", port=8000, reload=True)

@@ -6,7 +6,7 @@ import tempfile
 import mammoth
 import pypandoc
 
-from converters.html_wrap import wrap
+from ojsgalleon.converters.html_wrap import wrap
 
 # Matches any <th> tag (with optional attributes) and its content.
 _TH_RE = re.compile(r"<th(\s[^>]*)?>(?P<content>.*?)</th>", re.IGNORECASE | re.DOTALL)

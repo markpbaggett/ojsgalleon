@@ -1,15 +1,47 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "ojsgalleon"
 version = "0.1.0"
-description = "Add your description here"
+description = "Convert DOCX and PDF files to structured HTML or JATS XML for Open Journal Systems (OJS)"
 readme = "README.md"
-requires-python = ">=3.14"
-dependencies = [
-    "fastapi>=0.135.2",
-    "mammoth>=1.12.0",
-    "pdfplumber>=0.11.9",
-    "pypandoc>=1.17",
-    "pymupdf>=1.24.0",
-    "python-multipart>=0.0.20",
-    "uvicorn[standard]>=0.34.0",
+requires-python = ">=3.11"
+license = { text = "MIT" }
+keywords = ["ojs", "jats", "pdf", "docx", "html", "academic", "journal", "publishing"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Text Processing :: Markup :: HTML",
+    "Topic :: Text Processing :: Markup :: XML",
+    "Topic :: Scientific/Engineering",
 ]
+dependencies = [
+    "fastapi>=0.115.0",
+    "mammoth>=1.8.0",
+    "pdfplumber>=0.11.0",
+    "pypandoc>=1.13",
+    "pymupdf>=1.24.0",
+    "python-multipart>=0.0.12",
+    "uvicorn[standard]>=0.30.0",
+]
+
+[project.scripts]
+ojsgalleon = "ojsgalleon.cli:main"
+
+[project.urls]
+Repository = "https://github.com/tamu-dc-labs/ojsgalleon"
+"Bug Tracker" = "https://github.com/tamu-dc-labs/ojsgalleon/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ojsgalleon"]
+
+[tool.uv]
+dev-dependencies = []

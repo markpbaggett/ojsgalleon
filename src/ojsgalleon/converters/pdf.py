@@ -21,7 +21,7 @@ from html import escape
 import fitz
 import pdfplumber
 
-from converters.html_wrap import wrap
+from ojsgalleon.converters.html_wrap import wrap
 
 _HEADING_WIDTH_RATIO = 0.6
 
