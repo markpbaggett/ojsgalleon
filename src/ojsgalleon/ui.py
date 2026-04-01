@@ -44,7 +44,7 @@ _PAGE = """\
     <span class="text-2xl">⛵</span>
     <div>
       <h1 class="text-lg font-semibold text-slate-800 leading-tight">OJS Galleon</h1>
-      <p class="text-xs text-slate-400">DOCX &amp; PDF → HTML / JATS XML for Open Journal Systems</p>
+      <p class="text-xs text-slate-700">Convert DOCX &amp; PDF → HTML / JATS XML for Open Journal Systems Galleys!</p>
     </div>
   </header>
 
@@ -81,7 +81,7 @@ _PAGE = """\
             <p id="file-label" class="text-slate-600 font-medium">
               Drop a PDF or DOCX here
             </p>
-            <p class="text-slate-400 text-sm mt-1">or click to browse</p>
+            <p class="text-slate-700 text-sm mt-1">or click to browse</p>
           </div>
         </label>
 
@@ -89,10 +89,10 @@ _PAGE = """\
         <div class="flex flex-wrap items-end gap-4 mt-5">
 
           <div>
-            <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">
+            <label for="output-select" class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">
               Output format
             </label>
-            <select name="output_format"
+            <select id="output-select" name="output_format"
                     class="rounded-lg border border-slate-300 bg-white px-3 py-2
                            text-sm text-slate-700 shadow-sm focus:outline-none
                            focus:ring-2 focus:ring-indigo-500">
@@ -102,10 +102,10 @@ _PAGE = """\
           </div>
 
           <div>
-            <label class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">
+            <label for="lang-select" class="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">
               Language
             </label>
-            <input name="lang" value="en" maxlength="10"
+            <input id="lang-select" name="lang" value="en" maxlength="10"
                    class="w-24 rounded-lg border border-slate-300 bg-white px-3 py-2
                           text-sm text-slate-700 shadow-sm focus:outline-none
                           focus:ring-2 focus:ring-indigo-500">
@@ -137,7 +137,7 @@ _PAGE = """\
     <!-- ── Preview pane (HTMX swap target) ────────────────────────────── -->
     <div id="preview-pane">
       <div class="flex items-center justify-center h-40 rounded-xl border-2
-                  border-dashed border-slate-200 text-slate-400 text-sm">
+                  border-dashed border-slate-200 text-slate-700 text-sm">
         Converted output will appear here
       </div>
     </div>
