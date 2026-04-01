@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ojsgalleon"
-version = "0.1.0"
+version = "0.2.0"
 description = "Convert DOCX and PDF files to structured HTML or JATS XML for Open Journal Systems (OJS)"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -53,4 +53,9 @@ exclude = [
 ]
 
 [tool.uv]
-dev-dependencies = []
+dev-dependencies = [
+    "pytest>=9.0.2",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

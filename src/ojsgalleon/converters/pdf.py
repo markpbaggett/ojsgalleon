@@ -298,6 +298,69 @@ def _detect_column_split(words: list[dict], page_width: float) -> float | None:
     return (gutter_bin + 0.5) * bin_w
 
 
+def _column_regions(
+    words: list[dict], split_x: float
+) -> list[tuple[str, list[dict]]]:
+    """Split words into alternating full-width and column regions.
+
+    A line is "full-width" when its words form a continuous span across the
+    gutter — i.e. it has words on both sides *and* the gap between the
+    rightmost left word and the leftmost right word is small (≤ 15 pt, normal
+    word spacing).
+
+    A line is "column-confined" when words sit on only one side, OR when
+    words appear on both sides but are separated by a large gutter gap (≥ 15 pt),
+    which means they are two independent column lines sharing the same y-row.
+
+    Consecutive lines of the same type are grouped into a region so that
+    full-width regions (title, abstract, cross-column headings) are processed
+    as single-column text and column-confined regions are processed
+    left-then-right.
+
+    Returns a list of (region_type, words) where region_type is 'full' or
+    'column'.
+    """
+    _GUTTER_GAP_THRESHOLD = 15.0  # pt — gaps larger than this are inter-column
+
+    # Group words by line (rounded top-y).
+    line_map: dict[float, list[dict]] = {}
+    for w in words:
+        key = round(float(w["top"]), 0)
+        line_map.setdefault(key, []).append(w)
+
+    regions: list[tuple[str, list[dict]]] = []
+    current_type: str | None = None
+    current_words: list[dict] = []
+
+    for y_key in sorted(line_map):
+        line_words = line_map[y_key]
+        left_words  = [w for w in line_words if float(w["x0"]) <  split_x]
+        right_words = [w for w in line_words if float(w["x0"]) >= split_x]
+
+        if left_words and right_words:
+            max_x1_left  = max(float(w["x1"]) for w in left_words)
+            min_x0_right = min(float(w["x0"]) for w in right_words)
+            gap = min_x0_right - max_x1_left
+            # Small gap → text flows across the gutter (full-width line).
+            # Large gap → two independent column lines at the same y-row.
+            line_type = "full" if gap <= _GUTTER_GAP_THRESHOLD else "column"
+        else:
+            line_type = "column"
+
+        if line_type == current_type:
+            current_words.extend(line_words)
+        else:
+            if current_words:
+                regions.append((current_type, current_words))  # type: ignore[arg-type]
+            current_type = line_type
+            current_words = list(line_words)
+
+    if current_words:
+        regions.append((current_type, current_words))  # type: ignore[arg-type]
+
+    return regions
+
+
 # ---------------------------------------------------------------------------
 # Text element builder (shared by single- and multi-column paths)
 # ---------------------------------------------------------------------------
@@ -488,10 +551,10 @@ def _extract_elements(pdf_path: str) -> list[dict]:
                 split_x = _detect_column_split(words, page_width)
 
                 if split_x is not None:
-                    # Two-column: build left then right independently so
-                    # reading order is preserved across both columns.
-                    left_words  = [w for w in words if float(w["x0"]) <  split_x]
-                    right_words = [w for w in words if float(w["x0"]) >= split_x]
+                    # Mixed-layout: some lines may span the full width (title,
+                    # abstract, cross-column headings) while others are confined
+                    # to one column.  Process each region appropriately so that
+                    # full-width text is never split across columns.
                     common_args = dict(
                         page_width=page_width,
                         median_size=median_size,
@@ -500,12 +563,19 @@ def _extract_elements(pdf_path: str) -> list[dict]:
                         page_num=page_num,
                         running_text=running_text,
                     )
-                    # Sort left column by y, then append right column sorted by y.
-                    # Tables and images (col-unaware) sort by their raw y before both.
-                    text_elements = (
-                        _build_text_elements(left_words,  **common_args)
-                        + _build_text_elements(right_words, **common_args)
-                    )
+                    text_elements = []
+                    for region_type, region_words in _column_regions(words, split_x):
+                        if region_type == "full":
+                            text_elements.extend(
+                                _build_text_elements(region_words, **common_args)
+                            )
+                        else:
+                            left_words  = [w for w in region_words if float(w["x0"]) <  split_x]
+                            right_words = [w for w in region_words if float(w["x0"]) >= split_x]
+                            text_elements.extend(
+                                _build_text_elements(left_words,  **common_args)
+                                + _build_text_elements(right_words, **common_args)
+                            )
                 else:
                     text_elements = _build_text_elements(
                         words,

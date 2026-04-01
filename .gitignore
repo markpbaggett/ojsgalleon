@@ -17,3 +17,6 @@ wheels/
 # test files
 paper.html
 paper.xml
+
+# Other Junk
+.DS_Store
