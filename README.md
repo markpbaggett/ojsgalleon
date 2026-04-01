@@ -27,7 +27,6 @@ Convert DOCX and PDF files to structured HTML or JATS XML for additional galleys
 ## Requirements
 
 - Python ≥ 3.11
-- [uv](https://docs.astral.sh/uv/) package manager
 - [pandoc](https://pandoc.org/installing.html) on `$PATH` (required for DOCX → JATS only)
 
 ```bash
