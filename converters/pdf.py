@@ -260,6 +260,135 @@ def _table_to_jats(rows: list[list]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Column detection
+# ---------------------------------------------------------------------------
+
+def _detect_column_split(words: list[dict], page_width: float) -> float | None:
+    """Return the x-coordinate of a two-column gutter, or None if single-column.
+
+    Builds a word-density histogram across the page width and looks for a
+    near-empty bin in the middle third.  Requires at least 30 words so that
+    sparse pages (title, blank) don't produce false positives.
+    """
+    if len(words) < 30:
+        return None
+
+    n_bins = 40
+    bin_w = page_width / n_bins
+    counts = [0] * n_bins
+    for w in words:
+        mid = (float(w["x0"]) + float(w["x1"])) / 2
+        counts[min(int(mid / bin_w), n_bins - 1)] += 1
+
+    # Only search the middle third of the page for the gutter.
+    lo = int(n_bins * 0.30)
+    hi = int(n_bins * 0.70)
+    mid_counts = counts[lo:hi]
+    if not mid_counts:
+        return None
+
+    avg = sum(counts) / n_bins
+    min_val = min(mid_counts)
+
+    # The gutter must be substantially emptier than the page average.
+    if avg == 0 or min_val > avg * 0.20:
+        return None
+
+    gutter_bin = lo + mid_counts.index(min_val)
+    return (gutter_bin + 0.5) * bin_w
+
+
+# ---------------------------------------------------------------------------
+# Text element builder (shared by single- and multi-column paths)
+# ---------------------------------------------------------------------------
+
+def _build_text_elements(
+    words: list[dict],
+    page_width: float,
+    median_size: float,
+    table_bboxes: list[tuple],
+    page_height: float,
+    page_num: int,
+    running_text: "_RunningText",
+) -> list[dict]:
+    """Convert a list of pdfplumber words into paragraph/heading dicts.
+
+    Handles table exclusion, page-number filtering, running header/footer
+    suppression, gap-based paragraph detection, and heading classification.
+    Words should already be restricted to a single column when called from
+    a multi-column context.
+    """
+    # Group words into lines by rounded top-y, skipping table regions.
+    raw_lines: dict[float, list[dict]] = {}
+    for w in words:
+        if _word_in_bboxes(float(w["top"]), table_bboxes):
+            continue
+        key = round(float(w["top"]), 0)
+        raw_lines.setdefault(key, []).append(w)
+
+    sorted_lines = sorted(raw_lines.items())
+
+    line_bottoms = {
+        y: max(float(w.get("bottom", y + 12)) for w in wds)
+        for y, wds in sorted_lines
+    }
+
+    gaps = [
+        sorted_lines[i][0] - line_bottoms[sorted_lines[i - 1][0]]
+        for i in range(1, len(sorted_lines))
+        if sorted_lines[i][0] - line_bottoms[sorted_lines[i - 1][0]] > 0
+    ]
+    median_gap = sorted(gaps)[len(gaps) // 2] if gaps else 2.0
+    para_threshold = median_gap * 1.6
+
+    elements: list[dict] = []
+    para_lines: list[str] = []
+    para_y: float = 0.0
+
+    for i, (y_key, line_words) in enumerate(sorted_lines):
+        line_words.sort(key=lambda w: w["x0"])
+        text = " ".join(w["text"] for w in line_words).strip()
+        if not text:
+            continue
+
+        if _is_page_number(text, y_key, page_height):
+            continue
+
+        in_top = y_key < page_height * _MARGIN_RATIO
+        in_bottom = y_key > page_height * (1 - _MARGIN_RATIO)
+        if in_top and page_num > 0 and text in running_text.headers:
+            continue
+        if in_bottom and text in running_text.footers:
+            continue
+
+        avg_size = sum(float(w.get("size", 12) or 12) for w in line_words) / len(line_words)
+        line_width = line_words[-1]["x1"] - line_words[0]["x0"]
+        width_ratio = line_width / page_width
+        is_heading = avg_size > median_size * 1.15 and width_ratio < _HEADING_WIDTH_RATIO
+
+        if is_heading:
+            if para_lines:
+                elements.append({"type": "p", "text": " ".join(para_lines), "y": para_y})
+                para_lines = []
+            tag = "h2" if avg_size > median_size * 1.4 else "h3"
+            elements.append({"type": tag, "text": text, "y": y_key})
+        else:
+            if i > 0 and para_lines:
+                prev_y = sorted_lines[i - 1][0]
+                if y_key - line_bottoms[prev_y] > para_threshold:
+                    elements.append({"type": "p", "text": " ".join(para_lines), "y": para_y})
+                    para_lines = []
+            if not para_lines:
+                para_y = y_key
+            para_lines.append(text)
+
+    if para_lines:
+        elements.append({"type": "p", "text": " ".join(para_lines), "y": para_y})
+
+    return elements
+
+
+# ---------------------------------------------------------------------------
 # Core extraction
 # ---------------------------------------------------------------------------
 
@@ -319,124 +448,79 @@ def _extract_elements(pdf_path: str) -> list[dict]:
                 })
 
             # ----------------------------------------------------------------
-            # 3. Text via pdfplumber, excluding table regions
-            #    Lines are grouped by their top-y coordinate, then paragraph
-            #    breaks are inferred from vertical gaps between lines.
+            # 3. Text via pdfplumber
+            #    Detect single- vs two-column layout, then build paragraphs
+            #    per column so left-column content always precedes right.
             # ----------------------------------------------------------------
             words = plumber_page.extract_words(extra_attrs=["size", "bottom"])
+            page_height = float(plumber_page.height)
+            page_width = float(plumber_page.width)
+
             if words:
-                sizes = sorted(float(w.get("size", 12) or 12) for w in words)
-                median_size = sizes[len(sizes) // 2]
-                page_width = float(plumber_page.width)
-
-                # Group words into lines keyed by rounded top-y.
-                raw_lines: dict[float, list[dict]] = {}
+                # Pre-filter: reconstruct full-page margin lines (before any
+                # column split) and mark y-positions belonging to page numbers
+                # or running headers/footers.  This ensures that a footer
+                # spanning both columns is matched as one combined string.
+                margin_lines: dict[float, list[dict]] = {}
                 for w in words:
-                    if _word_in_bboxes(float(w["top"]), table_bboxes):
-                        continue
-                    key = round(float(w["top"]), 0)
-                    raw_lines.setdefault(key, []).append(w)
+                    y = float(w["top"])
+                    if (y < page_height * _MARGIN_RATIO
+                            or y > page_height * (1 - _MARGIN_RATIO)):
+                        margin_lines.setdefault(round(y, 0), []).append(w)
 
-                sorted_lines = sorted(raw_lines.items())  # [(y_top, [words])]
-
-                # Bottom y of each line = max word-bottom in that line.
-                line_bottoms = {
-                    y: max(float(w.get("bottom", y + 12)) for w in wds)
-                    for y, wds in sorted_lines
-                }
-
-                # Collect inter-line gaps to find the "normal" line spacing.
-                gaps = []
-                for i in range(1, len(sorted_lines)):
-                    prev_y = sorted_lines[i - 1][0]
-                    curr_y = sorted_lines[i][0]
-                    gap = curr_y - line_bottoms[prev_y]
-                    if gap > 0:
-                        gaps.append(gap)
-
-                if gaps:
-                    gaps.sort()
-                    median_gap = gaps[len(gaps) // 2]
-                else:
-                    median_gap = 2.0
-                # A gap larger than this threshold means a new paragraph.
-                para_threshold = median_gap * 1.6
-
-                # Walk lines, accumulating body text into paragraphs and
-                # flushing whenever a heading or a large gap is encountered.
-                para_lines: list[str] = []
-                para_y: float = 0.0
-
-                for i, (y_key, line_words) in enumerate(sorted_lines):
-                    line_words.sort(key=lambda w: w["x0"])
-                    text = " ".join(w["text"] for w in line_words).strip()
-                    if not text:
-                        continue
-
-                    avg_size = sum(
-                        float(w.get("size", 12) or 12) for w in line_words
-                    ) / len(line_words)
-                    line_width = line_words[-1]["x1"] - line_words[0]["x0"]
-                    width_ratio = line_width / page_width
-                    page_height = float(plumber_page.height)
-                    if _is_page_number(text, y_key, page_height):
-                        continue
-
+                skip_ys: set[float] = set()
+                for y_key, mw in margin_lines.items():
+                    mw.sort(key=lambda mword: mword["x0"])
+                    text = " ".join(mword["text"] for mword in mw).strip()
                     in_top = y_key < page_height * _MARGIN_RATIO
-                    in_bottom = y_key > page_height * (1 - _MARGIN_RATIO)
+                    if _PAGE_NUM_RE.match(text):
+                        skip_ys.add(y_key)
+                    elif in_top and page_num > 0 and text in running_text.headers:
+                        skip_ys.add(y_key)
+                    elif not in_top and text in running_text.footers:
+                        skip_ys.add(y_key)
 
-                    # Repeating top-margin text: keep on page 1, drop thereafter.
-                    if in_top and page_num > 0 and text in running_text.headers:
-                        continue
-                    # Repeating bottom-margin text: drop on every page.
-                    if in_bottom and text in running_text.footers:
-                        continue
+                words = [w for w in words if round(float(w["top"]), 0) not in skip_ys]
 
-                    is_heading = (
-                        avg_size > median_size * 1.15
-                        and width_ratio < _HEADING_WIDTH_RATIO
+                sizes = sorted(float(w.get("size", 12) or 12) for w in words)
+                median_size = sizes[len(sizes) // 2] if sizes else 10.0
+
+                split_x = _detect_column_split(words, page_width)
+
+                if split_x is not None:
+                    # Two-column: build left then right independently so
+                    # reading order is preserved across both columns.
+                    left_words  = [w for w in words if float(w["x0"]) <  split_x]
+                    right_words = [w for w in words if float(w["x0"]) >= split_x]
+                    common_args = dict(
+                        page_width=page_width,
+                        median_size=median_size,
+                        table_bboxes=table_bboxes,
+                        page_height=page_height,
+                        page_num=page_num,
+                        running_text=running_text,
+                    )
+                    # Sort left column by y, then append right column sorted by y.
+                    # Tables and images (col-unaware) sort by their raw y before both.
+                    text_elements = (
+                        _build_text_elements(left_words,  **common_args)
+                        + _build_text_elements(right_words, **common_args)
+                    )
+                else:
+                    text_elements = _build_text_elements(
+                        words,
+                        page_width=page_width,
+                        median_size=median_size,
+                        table_bboxes=table_bboxes,
+                        page_height=page_height,
+                        page_num=page_num,
+                        running_text=running_text,
                     )
 
-                    if is_heading:
-                        # Flush any pending paragraph before the heading.
-                        if para_lines:
-                            page_elements.append({
-                                "type": "p",
-                                "text": " ".join(para_lines),
-                                "y": para_y,
-                            })
-                            para_lines = []
-                        tag = "h2" if avg_size > median_size * 1.4 else "h3"
-                        page_elements.append({"type": tag, "text": text, "y": y_key})
-                    else:
-                        # Check whether the gap from the previous line is large
-                        # enough to signal a paragraph break.
-                        if i > 0 and para_lines:
-                            prev_y = sorted_lines[i - 1][0]
-                            gap = y_key - line_bottoms[prev_y]
-                            if gap > para_threshold:
-                                page_elements.append({
-                                    "type": "p",
-                                    "text": " ".join(para_lines),
-                                    "y": para_y,
-                                })
-                                para_lines = []
-
-                        if not para_lines:
-                            para_y = y_key
-                        para_lines.append(text)
-
-                # Flush the last paragraph on the page.
-                if para_lines:
-                    page_elements.append({
-                        "type": "p",
-                        "text": " ".join(para_lines),
-                        "y": para_y,
-                    })
+                page_elements.extend(text_elements)
 
             else:
                 # Fallback: plain text extraction for image-only pages.
-                # Split on blank lines to preserve paragraph breaks.
                 raw = plumber_page.extract_text() or ""
                 current: list[str] = []
                 for i, line in enumerate(raw.splitlines()):
@@ -457,8 +541,15 @@ def _extract_elements(pdf_path: str) -> list[dict]:
                         "y": float(len(raw.splitlines())),
                     })
 
-            page_elements.sort(key=lambda e: e["y"])
-            all_elements.extend(page_elements)
+            # Non-text elements (tables, images) sort by raw y-position.
+            # Text elements from multi-column pages are already in column order
+            # so we preserve their relative sequence and only sort non-text items.
+            non_text = sorted(
+                [e for e in page_elements if e["type"] not in ("p", "h2", "h3")],
+                key=lambda e: e["y"],
+            )
+            text_only = [e for e in page_elements if e["type"] in ("p", "h2", "h3")]
+            all_elements.extend(non_text + text_only)
 
     fitz_doc.close()
     return all_elements
