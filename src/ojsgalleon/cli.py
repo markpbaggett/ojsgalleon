@@ -1,4 +1,4 @@
-"""Command-line interface for OJS Galleon conversions.
+""" Provides a command-line interface for OJS Galleon conversions.
 
 Usage:
     ojsgalleon convert <file> [--format html|jats] [--output <outfile>] [--lang <lang>]
@@ -76,7 +76,6 @@ def main() -> None:
         help="BCP 47 language tag for html[lang] (default: en)",
     )
 
-    # ── serve ─────────────────────────────────────────────────────────────────
     p_serve = sub.add_parser("serve", help="Start the conversion API server.")
     p_serve.add_argument("--host", default="0.0.0.0")
     p_serve.add_argument("--port", type=int, default=8000)

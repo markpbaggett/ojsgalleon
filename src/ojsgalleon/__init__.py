@@ -1,5 +1,3 @@
-"""OJS Galleon — convert DOCX and PDF files to HTML or JATS XML."""
-
 from ojsgalleon.converters.docx import docx_to_html, docx_to_jats
 from ojsgalleon.converters.pdf import pdf_to_html, pdf_to_jats
 

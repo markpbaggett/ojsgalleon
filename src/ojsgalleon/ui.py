@@ -1,5 +1,3 @@
-"""HTMX + Tailwind drag-and-drop UI for OJS Galleon."""
-
 import base64
 from html import escape
 from pathlib import Path
@@ -10,10 +8,6 @@ from fastapi.responses import HTMLResponse
 router = APIRouter()
 
 SUPPORTED = {".docx", ".pdf"}
-
-# ---------------------------------------------------------------------------
-# Main page
-# ---------------------------------------------------------------------------
 
 _PAGE = """\
 <!DOCTYPE html>
@@ -183,11 +177,6 @@ _PAGE = """\
 </body>
 </html>
 """
-
-
-# ---------------------------------------------------------------------------
-# Conversion endpoint (returns HTML fragment for HTMX swap)
-# ---------------------------------------------------------------------------
 
 def _data_href(content: str, mime: str) -> str:
     """Return a base64 data-URI suitable for an <a download> link."""

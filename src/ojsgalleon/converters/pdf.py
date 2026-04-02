@@ -169,10 +169,6 @@ def _find_running_text(pdf_path: str) -> _RunningText:
     )
 
 
-# ---------------------------------------------------------------------------
-# Internal helpers
-# ---------------------------------------------------------------------------
-
 def _word_in_bboxes(word_top: float, bboxes: list[tuple]) -> bool:
     """Return True if word_top falls inside any of the given bboxes.
 
@@ -258,10 +254,6 @@ def _table_to_jats(rows: list[list]) -> str:
     lines.append("</table-wrap>")
     return "\n".join(lines)
 
-
-# ---------------------------------------------------------------------------
-# Column detection
-# ---------------------------------------------------------------------------
 
 def _detect_column_split(words: list[dict], page_width: float) -> float | None:
     """Return the x-coordinate of a two-column gutter, or None if single-column.
@@ -361,10 +353,6 @@ def _column_regions(
     return regions
 
 
-# ---------------------------------------------------------------------------
-# Text element builder (shared by single- and multi-column paths)
-# ---------------------------------------------------------------------------
-
 def _build_text_elements(
     words: list[dict],
     page_width: float,
@@ -451,10 +439,6 @@ def _build_text_elements(
     return elements
 
 
-# ---------------------------------------------------------------------------
-# Core extraction
-# ---------------------------------------------------------------------------
-
 def _extract_elements(pdf_path: str) -> list[dict]:
     """Return page elements sorted by (page, y-position).
 
@@ -473,9 +457,6 @@ def _extract_elements(pdf_path: str) -> list[dict]:
             fitz_page = fitz_doc[page_num]
             page_elements: list[dict] = []
 
-            # ----------------------------------------------------------------
-            # 1. Tables via pdfplumber
-            # ----------------------------------------------------------------
             table_bboxes: list[tuple] = []
             for tbl in plumber_page.find_tables():
                 rows = tbl.extract()
@@ -510,11 +491,6 @@ def _extract_elements(pdf_path: str) -> list[dict]:
                     "y": rect.y0,
                 })
 
-            # ----------------------------------------------------------------
-            # 3. Text via pdfplumber
-            #    Detect single- vs two-column layout, then build paragraphs
-            #    per column so left-column content always precedes right.
-            # ----------------------------------------------------------------
             words = plumber_page.extract_words(extra_attrs=["size", "bottom"])
             page_height = float(plumber_page.height)
             page_width = float(plumber_page.width)
@@ -624,10 +600,6 @@ def _extract_elements(pdf_path: str) -> list[dict]:
     fitz_doc.close()
     return all_elements
 
-
-# ---------------------------------------------------------------------------
-# Public API
-# ---------------------------------------------------------------------------
 
 def pdf_to_html(file_bytes: bytes, lang: str = "en") -> str:
     """Convert PDF bytes to a full, accessible HTML5 document."""
