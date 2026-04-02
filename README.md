@@ -1,9 +1,33 @@
 # OJS Galleon
 
-Convert DOCX and PDF files to structured HTML or JATS XML for additional galleys on
-[Open Journal Systems (OJS)](https://pkp.sfu.ca/software/ojs/) sites.
+OJS Galleon is an experimental application that attempts to convert DOCX and PDF files to structured HTML or JATS XML 
+in order to provide an HTML galley for [Open Journal Systems (OJS)](https://pkp.sfu.ca/software/ojs/) sites.
 
-## How it works
+While not perfect (this is a hard problem), OJS Galleon attempts to get you 90% there and provide you a nice looking,
+professional HTML galley that is ADA Accessible out-of-the-box with some minor needs for copy editing.
+
+## How it works at a high level
+
+OJS Galleon uses two libraries in tandem for PDF extraction: [pdfplumber](https://github.com/jsvine/pdfplumber) (built 
+on pdfminer) for text and tables, and [pymupdf](https://github.com/pymupdf/PyMuPDF) (fitz) for images. pdfplumber gives
+word-level metadata lik each word's x/y position on the page and its font size which is the foundation for everything 
+else. Tables are detected via pdfplumber's find_tables(), which uses line detection to identify ruled grids and extract
+cell data.  Images are pulled via pymupdf because it provides reliable cross-reference IDs (xref) needed to extract 
+the raw image bytes, which pdfplumber alone doesn't expose cleanly. Both libraries operate on the same PDF simultaneously,
+one per concern.
+
+The text pipeline then works in several passes on each page. First, running headers and footers are identified by 
+pre-scanning all pages and counting how often each margin line appears. Text that repeats on 40%+ of pages is flagged as
+boilerplate and suppressed. Then, for each page, a word-density histogram across the page width is built to detect 
+whether a gutter (near-empty vertical strip) exists in the middle third of the page (this is the magic behind how a
+two-column layout is identified even if it's not perfect). When a gutter is found, individual lines are further 
+classified as either "full-width" (words on both sides with a small gap, like a title or abstract) or "column-confined" 
+(words on both sides but with a large inter-column gap, meaning they're two independent parallel lines). Full-width 
+regions are read straight across; column regions are read left column first, then right (sorry for lack of international
+support). Finally, font-size heuristics promote lines with larger-than-median text into headings, and gap-based 
+paragraph detection groups consecutive lines into `<p>` elements by measuring whether the vertical space between lines 
+exceeds 1.6× the median line spacing on that page.
+
 
 | Source | → HTML | → JATS XML |
 |--------|--------|------------|
