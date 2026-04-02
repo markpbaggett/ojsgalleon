@@ -255,9 +255,11 @@ def wrap(html_fragment: str, title: str = "", lang: str = "en") -> str:
   </style>
 </head>
 <body>
+<main>
 <article>
 {html_fragment}
 </article>
+</main>
 </body>
 </html>
 """
