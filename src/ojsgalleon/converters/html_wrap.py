@@ -116,7 +116,6 @@ _CSS = """\
   /* ── Body text ── */
   p {
     margin-top: 1rem;
-    text-align: justify;
     hyphens: auto;
     -webkit-hyphens: auto;
   }
