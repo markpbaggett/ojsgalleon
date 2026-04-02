@@ -24,6 +24,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 dependencies = [
+    "anthropic>=0.40.0",
     "fastapi>=0.115.0",
     "mammoth>=1.8.0",
     "pdfplumber>=0.11.0",

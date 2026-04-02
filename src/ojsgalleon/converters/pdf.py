@@ -21,6 +21,49 @@ from html import escape
 import fitz
 import pdfplumber
 
+ 
+def _generate_alt_text(b64: str, ext: str) -> str:
+    """Call Claude Haiku to generate alt text for an image."""
+    try:
+        import anthropic
+    except ImportError:
+        return "Figure"
+
+    api_key = os.environ.get("CLAUDE_API")
+    if not api_key:
+        return "Figure"
+
+    _MEDIA_TYPES = {
+        "png": "image/png",
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "gif": "image/gif",
+        "webp": "image/webp",
+    }
+    media_type = _MEDIA_TYPES.get(ext.lower(), "image/png")
+
+    client = anthropic.Anthropic(api_key=api_key)
+    message = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=256,
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                        "source": {"type": "base64", "media_type": media_type, "data": b64},
+                    },
+                    {
+                        "type": "text",
+                        "text": "Describe this image concisely for use as HTML alt text. Respond with only the description, no preamble.",
+                    },
+                ],
+            }
+        ],
+    )
+    return message.content[0].text.strip()
+
 from ojsgalleon.converters.html_wrap import wrap
 
 _HEADING_WIDTH_RATIO = 0.6
@@ -439,7 +482,7 @@ def _build_text_elements(
     return elements
 
 
-def _extract_elements(pdf_path: str) -> list[dict]:
+def _extract_elements(pdf_path: str, generate_alt_text: bool = False) -> list[dict]:
     """Return page elements sorted by (page, y-position).
 
     Each element is a dict with at minimum a 'type' key:
@@ -483,11 +526,17 @@ def _extract_elements(pdf_path: str) -> list[dict]:
                 except Exception:
                     continue
                 b64 = base64.b64encode(img_data["image"]).decode()
+                ext = img_data["ext"]
+                alt = (
+                    _generate_alt_text(b64, ext)
+                    if generate_alt_text
+                    else f"Figure on page {page_num + 1}"
+                )
                 page_elements.append({
                     "type": "image",
                     "b64": b64,
-                    "ext": img_data["ext"],
-                    "alt": f"Figure on page {page_num + 1}",
+                    "ext": ext,
+                    "alt": alt,
                     "y": rect.y0,
                 })
 
@@ -601,13 +650,13 @@ def _extract_elements(pdf_path: str) -> list[dict]:
     return all_elements
 
 
-def pdf_to_html(file_bytes: bytes, lang: str = "en") -> str:
+def pdf_to_html(file_bytes: bytes, lang: str = "en", generate_alt_text: bool = False) -> str:
     """Convert PDF bytes to a full, accessible HTML5 document."""
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
         tmp.write(file_bytes)
         tmp_path = tmp.name
     try:
-        elements = _extract_elements(tmp_path)
+        elements = _extract_elements(tmp_path, generate_alt_text=generate_alt_text)
     finally:
         os.unlink(tmp_path)
 
@@ -631,13 +680,13 @@ def pdf_to_html(file_bytes: bytes, lang: str = "en") -> str:
     return wrap("\n".join(parts), lang=lang)
 
 
-def pdf_to_jats(file_bytes: bytes) -> str:
+def pdf_to_jats(file_bytes: bytes, generate_alt_text: bool = False) -> str:
     """Convert PDF bytes to a JATS XML document."""
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
         tmp.write(file_bytes)
         tmp_path = tmp.name
     try:
-        elements = _extract_elements(tmp_path)
+        elements = _extract_elements(tmp_path, generate_alt_text=generate_alt_text)
     finally:
         os.unlink(tmp_path)
 

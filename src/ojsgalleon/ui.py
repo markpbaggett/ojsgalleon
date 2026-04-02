@@ -105,6 +105,16 @@ _PAGE = """\
                           focus:ring-2 focus:ring-indigo-500">
           </div>
 
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="gen-alt-text" name="generate_alt_text"
+                   value="true"
+                   class="h-4 w-4 rounded border-slate-300 text-indigo-600
+                          focus:ring-indigo-500">
+            <label for="gen-alt-text" class="text-sm text-slate-700 whitespace-nowrap">
+              AI alt text <span class="text-slate-800 text-xs">(PDF only)</span>
+            </label>
+          </div>
+
           <button type="submit" id="convert-btn"
                   class="ml-auto rounded-lg bg-indigo-600 hover:bg-indigo-700
                          text-white font-medium text-sm px-5 py-2 shadow-sm
@@ -204,6 +214,7 @@ async def ui_convert(
     file: UploadFile = File(...),
     output_format: str = Form("html"),
     lang: str = Form("en"),
+    generate_alt_text: str = Form(""),
 ):
     filename = file.filename or "document"
     ext = Path(filename).suffix.lower()
@@ -219,6 +230,7 @@ async def ui_convert(
     content = await file.read()
     warnings: list[str] = []
     stem = Path(filename).stem
+    use_ai_alt = generate_alt_text == "true"
 
     try:
         from ojsgalleon.converters.docx import docx_to_html, docx_to_jats
@@ -231,9 +243,9 @@ async def ui_convert(
                 result = docx_to_jats(content)
         else:
             if output_format == "html":
-                result = pdf_to_html(content, lang=lang)
+                result = pdf_to_html(content, lang=lang, generate_alt_text=use_ai_alt)
             else:
-                result = pdf_to_jats(content)
+                result = pdf_to_jats(content, generate_alt_text=use_ai_alt)
     except Exception as exc:
         return HTMLResponse(
             f'<div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 '
