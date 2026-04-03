@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dostal’s Comments on the Event of Meaning in Gadamer’s Hermeneutics</title>
+  <style>
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Design tokens ── */
+  :root {
+    --ink:        #1c2b3a;   /* near-black with a cool undertone            */
+    --ink-light:  #4a5568;   /* secondary text                              */
+    --accent:     #2c5282;   /* ink navy — headings, links, rule accents    */
+    --accent-mid: #4a7fb5;   /* lighter accent for borders                  */
+    --rule:       #d6dde6;   /* subtle dividers                             */
+    --bg-page:    #dde3ea;   /* cool warm-gray page background              */
+    --bg-card:    #ffffff;   /* article card surface                        */
+    --bg-tint:    #f0f4f8;   /* abstract / even-row tint                    */
+    --gold:       #b7860b;   /* warm accent for abstract label, top bar     */
+    --font-serif: "Georgia", "Times New Roman", serif;
+    --shadow-card: 0 2px 8px rgba(0,0,0,.08), 0 8px 32px rgba(0,0,0,.06);
+  }
+
+  /* ── Page shell ── */
+  body {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;    /* ≈ 17px — comfortable for long-form reading  */
+    line-height: 1.8;
+    color: var(--ink);
+    background-color: var(--bg-page);
+    /* Subtle linen-like texture via a repeating gradient */
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,.03) 2px,
+      rgba(255,255,255,.03) 4px
+    );
+    min-height: 100vh;
+    padding: 3rem 1rem 6rem;
+  }
+
+  /* ── Article card ── */
+  article {
+    max-width: 960px;          /* ~letter-page width at screen resolution    */
+    margin-inline: auto;
+    background: var(--bg-card);
+    border-radius: 3px;
+    box-shadow: var(--shadow-card);
+    /* Thin gold accent bar across the top */
+    border-top: 4px solid var(--gold);
+    padding: 3.5rem 5rem 4rem;
+  }
+
+  /* ── Headings ── */
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    color: var(--accent);
+    line-height: 1.2;
+    font-weight: normal;       /* Georgia italic/bold weight managed per level */
+  }
+
+  h1.article-title {
+    font-size: 2rem;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    font-variant: small-caps;
+    letter-spacing: 0.06em;
+    margin-top: 2.5rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  h3 {
+    font-size: 1.05rem;
+    font-style: italic;
+    margin-top: 1.75rem;
+    margin-bottom: 0.35rem;
+    color: var(--ink-light);
+  }
+
+  h4 {
+    font-size: 1rem;
+    font-style: italic;
+    margin-top: 1.25rem;
+    margin-bottom: 0.25rem;
+    color: var(--ink-light);
+  }
+
+  /* ── Body text ── */
+  p {
+    margin-top: 1rem;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+  /* Indent continuation paragraphs — classic book convention */
+  p + p {
+    text-indent: 1.75em;
+    margin-top: 0;
+  }
+  /* But never indent the first paragraph after a heading */
+  h1 + p, h2 + p, h3 + p, h4 + p { text-indent: 0; }
+
+  /* ── Abstract ── */
+  div.abstract {
+    background: var(--bg-tint);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--gold);
+    border-radius: 0 3px 3px 0;
+    padding: 1.25rem 1.5rem;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  div.abstract p { text-indent: 0; margin-top: 0.5rem; }
+  div.abstract p:first-child { margin-top: 0; }
+  div.abstract::before {
+    content: "Abstract";
+    display: block;
+    font-variant: small-caps;
+    letter-spacing: 0.1em;
+    font-size: 0.78rem;
+    color: var(--gold);
+    margin-bottom: 0.6rem;
+  }
+
+  /* ── Tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    overflow: hidden;   /* clip thead corner radius */
+  }
+  th, td {
+    padding: 0.6rem 1rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  thead th {
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-serif);
+    font-variant: small-caps;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    font-weight: normal;
+    border-bottom: 2px solid var(--accent-mid);
+  }
+  tbody tr { border-bottom: 1px solid var(--rule); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) td { background: var(--bg-tint); }
+  tbody tr:hover td { background: #e6edf5; transition: background 0.15s; }
+
+  /* ── Figures & images ── */
+  figure {
+    margin: 2.5rem 0;
+    text-align: center;
+  }
+  figure img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.10);
+  }
+  figcaption {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--ink-light);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* ── Inline ── */
+  strong { font-weight: bold; color: var(--ink); }
+  em     { font-style: italic; }
+  a      { color: var(--accent); text-underline-offset: 3px; }
+  a:hover { color: var(--gold); }
+
+  /* ── Responsive — collapse padding on small screens ── */
+  @media (max-width: 1020px) {
+    article { padding: 2.5rem 3rem 3rem; }
+  }
+  @media (max-width: 640px) {
+    article { padding: 1.5rem 1.25rem 2rem; }
+    h1.article-title { font-size: 1.5rem; }
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { background: #fff; padding: 0; }
+    article {
+      box-shadow: none;
+      border-top: none;
+      padding: 0;
+      max-width: 100%;
+    }
+    a { color: var(--ink); text-decoration: none; }
+    tbody tr:hover td { background: none; }
+  }
+
+  </style>
+</head>
+<body>
+<main>
+<article>
+<h1 class="article-title"><strong>Dostal’s Comments on the <em>Event of Meaning in Gadamer’s Hermeneutics</em></strong></h1><table><tr><td><p><strong>Robert Dostal</strong></p><p>Bryn Mawr College<br />rdostal@brynmawr.edu</p><h4>ORCID: <a href="https://orcid.org/0000-0002-1209-9162">https://orcid.org/0000-0002-1209-9162</a> </h4></td></tr><tr><td><h4>DOI: <a href="http://doi.org/10.21423/r6dyhn04">http://doi.org/10.21423/r6dyhn04</a>     </h4></td></tr></table><h4>Abstract</h4><p>This essay is Robert Dostal’s commentary for a book symposium on the recently published book <em>The Event of Meaning in Gadamer’s Hermeneutics</em> (Routledge 2024) by Carlo DaVia and Greg Lynch presented at the 2025 annual conference of the North American Society for Philosophical Hermeneutics. Dostal’s comments focus on three questions. The first question concerns how we might square Gadamer's insistence on occasionality and ideality. The second question concerns the account given about doxastic and substantive interpretations. The third question concerns the meaning of meaning.</p><p><strong>Keywords: </strong>Gadamer, Event of Meaning, Hermeneutics, Occasionality, Ideality</p><p>This is an important book on Gadamer’s hermeneutics. I am glad to have been asked to comment on it. It’s given me a lot to think about and has taught me a thing or two.</p><p>There is much to like about the book. I’ll first mention a few of these points. </p><p>It takes up many of the leading interpretations of Gadamer and his hermeneutics—Brice Wachterhauser, Charles Taylor, Kristin Gjesdal among others (and myself). DaVia and Lynch are generous and charitable to these authors as they criticize them. I think the book’s critique of Gjesdal is important because she provides one of the leading critiques of Gadamer’s hermeneutics and the book’s critique is appropriate inasmuch as it acknowledges that Gadamer’s reading of Schleiermacher is not entirely adequate, yet the book shows well what is right about Gadamer’s reading of Schleiermacher. </p><p>The book’s treatment of “correctness” in interpretation according to Gadamer is very well done. There are norms governing interpretation, not rules ensuring correspondence. There is a very nice account of the concepts of fusion and horizon.  The relevant fusion is of the horizon and not the standpoint. Arguably Gadamer is a “perspectivist,” but shifting from perspective to aspect, as the authors do, I find important. The book does well in emphasizing the importance of the “common world” for Gadamer’s hermeneutics. And there is more, but I should turn to my questions.</p><p>But, first, a comment on my comments. I find myself for the most part agreeing with their reading, their interpretation of Gadamer’s hermeneutics. The book is persuasive about the cogency of Gadamer’s position. I find myself, however, sometimes disagreeing with them about Gadamer and sometimes agreeing with them about Gadamer but disagreeing with Gadamer. And sometimes I am not sure if my disagreement is with DaVia and Lynch or with Gadamer.</p><h3>Question One: Occasionality and Ideality</h3><p>My first question concerns how we might square Gadamer’s insistence on occasionality and ideality. The authors are right about the importance of both these notions for Gadamer. And the book presents these notions well. Ideality, the authors write “is a matter of spatio-temporal independence . . .  It is not bound to any particular occasion.”<sup><a href="#footnote-1" id="footnote-ref-1">[1]</a></sup> How is this very independence somehow not an independence from historicity? The authors point out correctly that there are two kinds of temporal independence: 1) the eternal (numbers—ok, anything else?) and 2) contemporaneity. The book provides a nice example of contemporaneity in the performing arts.  </p><p>The authors write that in each case it is one and same meaning that is understood. Is there a distinction operating here between the speech and the meaning? I shouldn’t think so. But every speech is occasional. The meaning as independent temporally would seem to be independent of the occasion.</p><p>Another related question arose for me. In the third chapter on interpreting correctly, the authors refer to Gadamer’s claim that understanding is to understand the <em>Sache</em>, not another’s meaning. I may be quibbling a bit here, but if we can distinguish between the <em>Sache</em> and the other’s meaning, is there an important distinction between <em>Sache</em> and meaning?</p><h3>Question Two: Doxastic and Substantive Interpretations</h3><p>I accept the distinction of doxastic and substantive interpretations as presented here. But I have a couple questions in this regard. My questions concern the difference and relation of philosophical hermeneutics and philology (philological hermeneutics).   </p><p>I take it that the philologist deals in doxastic interpretations. Of the doxastic, you say several things. Some for me make excellent sense; others seem questionable.  </p><p>In reference to Gadamer’s proceeding like a philologist (on p. 119), you write:  “The fact that someone falls short of their own ideals does not entail that these ideals are false, and Gadamer would certainly not be the first philosopher who failed to practice what he preached.” Why call this a failure? Gadamer did not consider it a failure. On occasion he proudly presents himself as a certified philologist. On that same page you write that philology is a preparation for interpretation. It is “needed,” you write. If he is doing what’s needed, how is this a failure?  </p><p>Previously you claim that doxastic interpretation is possible only on the basis of a more fundamental substantive interpretation.<sup><a href="#footnote-2" id="footnote-ref-2">[2]</a></sup> Yet how is it that the substantive requires (needs) a doxastic interpretation? There is a circle here. Is it virtuous or vicious?</p><p>You claim that philology does not engage in interpretation itself. I find this a bit too much. Your own language belies this. You write about doxastic interpretation.  </p><p>Similarly, the book makes the strong claim that a doxastic interpretation (if I may use the word “interpretation” here) does not yield understanding of the <em>text</em> in question—“text” in italics.<sup><a href="#footnote-3" id="footnote-ref-3">[3]</a></sup> Yet you seem to suggest (perhaps I am wrong here) that it yields understanding of some sort. In making this claim that doxastic interpretation does not yield an understanding of the text, you cite a few pages of <em>Truth and Method</em>.<sup><a href="#footnote-4" id="footnote-ref-4">[4]</a></sup> I do not find Gadamer making this claim there, but perhaps I am missing something.</p><h3>Question Three: The Meaning of Meaning</h3><p>Here I raise the most important question—a question I am finding difficult to articulate. What for you and for Gadamer is the meaning of meaning? Let me begin to articulate this question with a typical citation from Gadamer: “what has been said in words is always less than what has been meant or was intended.”<sup><a href="#footnote-5" id="footnote-ref-5">[5]</a></sup></p><p>He says something like this fairly frequently. The words are not adequate to the “what.” I like to think of the “what” in the sentence as the “<em>Sache</em>”—whatever it is that the speech is about, that which is “intended.” DaVia and Lynch and I agree that in some important sense, Gadamer is a realist. I’m not sure that we agree about what sort of realist Gadamer is.  </p><p>I see a possible distinction between the “what” and the “meaning.” There is no distinction in the sense that the “what” is an essence and an essence is a meaning. But there is a distinction in the sense that what there is is Being. Things have a meaning; they are meaningful. I do not believe that our authors accept this distinction between the “what” and the “meaning.” They make the simple and strong claim that being is meaning.<sup><a href="#footnote-6" id="footnote-ref-6">[6]</a></sup>  They say that only by accepting this claim can we reconcile Gadamer’s realism with his aspectivism (my word). I do not find myself persuaded. I would claim that Being is intelligible (finitely so, aspectivally so), but not that Being is intelligibility.  My claim is that Being is meaningful, but not that it is meaning <em>simpliciter.</em> I think that Gadamer would like to follow Heidegger with regard to the realism/idealism question.  In <em>Being and Time</em> Heidegger argues that reality is dependent on care—it is dependent on <em>Dasein</em>.<sup><a href="#footnote-7" id="footnote-ref-7">[7]</a></sup> In this sense, Heidegger is an idealist. But, writes Heidegger, the real is not so dependent. In this sense, Heidegger is a realist. Were <em>Dasein</em> to disappear, go extinct, the real would persist—continue to <em>be</em>. But ideas and meaning would not.</p><p>Further, as far as I can determine, the closest the later Heidegger ever gets to answering the question of Being is the chiasmus: “The meaning of Being is the Being of meaning.” This does not make Being intelligibility.</p><p>Relevant to the book’s claim that being is meaning is the treatment of essences.  The claim is made that essences are aspectival. Does this claim make sense?  How so?  Yes, it does––in the sense that things present aspects of themselves. These aspects are intelligible. They are constitutive of the essence of the thing. But is the thing just its aspects? Yes, Gadamer writes that “the world is not different from the views in which it presents itself.” But this claim does not necessarily mean that world is merely a view.  The aspects are true of the thing, but there is a whole of which the aspect is not sufficient.</p><p>The consideration of this raises the question of the status of the concept of the “whole” for Gadamer. In the book’s criticism of Wachterhauser, we find a compelling argument that Wachterhauer’s reading seems to presuppose a divine being, God, who has a grasp of the whole, unlike we finite humans. DaVia and Lynch seem to be arguing that doing without God as a presupposition disposes of any need for a whole. I see Gadamer’s talk about the world presupposes the wholeness of the world, whose wholeness is inexhaustible and which presents aspects of itself to us the viewers of the world and participants in the world. The very talk about our common world suggests that it is a whole. The authors write that the aspects do not add up to a whole.<sup><a href="#footnote-8" id="footnote-ref-8">[8]</a></sup> In the sense that the whole is inexhaustible, this is so. But are the aspects aspects of a whole?  One could say that the aspects are of a whole while not adding up to a whole. In <em>Truth and Method</em> Gadamer writes about the significance of the “whole of language” for his hermeneutics: “Every word causes the whole of the language to which it responds to resonate and the whole world-view that underlies it to appear.”<sup><a href="#footnote-9" id="footnote-ref-9">[9]</a></sup> </p><p>Now that I have disagreed with the authors basic thesis regarding Gadamer’s realism, I have to ask myself whether am disagreeing with DaVia and Lynch, or are they right about Gadamer, and I am disagreeing not so much with them but with Gadamer.  As I consider this, I find myself wanting to say that Gadamer wants it both ways, and that DaVia and Lynch and their book may be more consistent in regard to this fundamental question than Gadamer is.</p><p>Let me finally add something about Gadamer wanting it both ways. In <em>Truth and Method</em> in the culminating ontological section, Gadamer writes: “That is why the hermeneutical phenomenon also can be illuminated only in light of the fundamental finitude of being which is wholly verbal in character.”<sup><a href="#footnote-10" id="footnote-ref-10">[10]</a></sup> Here is the claim that Being is language—wholly verbal (linguistic)in character. A bit later in the text, Gadamer writes: “If we start from the basic ontological view that being is language. . . .”<sup><a href="#footnote-11" id="footnote-ref-11">[11]</a></sup> This reiterates the claim. We all know how sharply Gadamer was criticized for the claim, the proposition: “Being that can be understood is language.”  </p><p>Later in his life, Gadamer writes in his “Autobiographical Reflections,” that “naturally, the fundamental linguisticality of understanding cannot mean that all experience of the world can only take place as and in language.”<sup><a href="#footnote-12" id="footnote-ref-12">[12]</a></sup> Here we find an important distinction between “experience” (<em>Erfahrung</em>) and language/linguisticality.  Later, in the published conversation with Grondin, he says: “I have never thought and never ever said that everything is language. Being that can be understood, insofar as it can be understood, is language.  This contains a limitation.  What cannot be understood can pose an endless task of at least finding a word that comes a little closer to the matter at issue [<em>die Sache</em>].”<sup><a href="#footnote-13" id="footnote-ref-13">[13]</a></sup> Here we find a distinction between language/linguisticality and <em>die Sache</em>. This would suggest to me that Being is not meaning—contra the thesis of this book.</p><h3>Bibliography</h3><p>DaVia, Carlo and Greg Lynch. <em>The Event of Meaning in Gadamer’s Hermeneutics.</em> Routledge, 2024.</p><p>Gadamer, Hans-Georg. “The Boundaries of Language.” Translated by Lawrence Schmidt and Monika Reuss. In <em>Language and Linguisticality in Gadamer’s Hermeneutics. </em>Edited by Lawrence Schmidt. Lexington Books, 2000.</p><p>Gadamer, Hans-Georg. <em>The Gadamer Reader</em>. Translated by Richard Palmer. Northwestern University Press, 2007. [GR]</p><p>Gadamer, Hans-Georg. <em>Truth and Method</em>. Translated and revised by Joel Weinsheimer and Donald G. Marshall. Continuum, 1999. [TM]</p><p>Heidegger, Martin. <em>Being and Time</em>. Translated by Joan Stambaugh and revised by Dennis Schmidt. State University of New York, 2010.</p><ol><li id="footnote-1"><p> Carlo DaVia and Greg Lynch, <em>The Event of Meaning in Gadamer’s Hermeneutics </em>(New York: Routledge, 2024), 47. <a href="#footnote-ref-1">↑</a></p></li><li id="footnote-2"><p> DaVia and Lynch, <em>The Event of Meaning</em>, 99. <a href="#footnote-ref-2">↑</a></p></li><li id="footnote-3"><p> DaVia and Lynch, <em>The Event of Meaning</em>, 96. <a href="#footnote-ref-3">↑</a></p></li><li id="footnote-4"><p> Hans-Georg Gadamer, <em>Truth and Method,</em> trans. and rev. Joel Weinsheimer and Donald G. Marshall (Continuum, 1999), 344–48. <a href="#footnote-ref-4">↑</a></p></li><li id="footnote-5"><p> Hans-Georg Gadamer, “The Boundaries of Language,” trans. Lawrence Schmidt and Monika Reuss, in <em>Language and Linguisticality in Gadamer’s Hermeneutics</em>, ed. Lawrence Schmidt (Lexington Books, 2000), 17. <a href="#footnote-ref-5">↑</a></p></li><li id="footnote-6"><p> DaVia and Lynch, <em>The Event of Meaning</em>, 178. <a href="#footnote-ref-6">↑</a></p></li><li id="footnote-7"><p> Martin Heidegger, <em>Being and Time</em>, trans. Joan Stambaugh and rev. Dennis Schmidt (State University of New York, 2010), 203–4. <a href="#footnote-ref-7">↑</a></p></li><li id="footnote-8"><p> DaVia and Lynch, <em>The Event of Meaning</em>, 177. <a href="#footnote-ref-8">↑</a></p></li><li id="footnote-9"><p> <em>TM</em>,<em> </em>458. <a href="#footnote-ref-9">↑</a></p></li><li id="footnote-10"><p> <em>TM</em>,<em> </em>458. <a href="#footnote-ref-10">↑</a></p></li><li id="footnote-11"><p> <em>TM</em>,<em> </em>487. <a href="#footnote-ref-11">↑</a></p></li><li id="footnote-12"><p> Hans-Georg Gadamer, “Autobiographical Reflections,” in <em>The Gadamer Reader</em>, trans. Richard Palmer (Northwestern University Press, 2007), 25. <a href="#footnote-ref-12">↑</a></p></li><li id="footnote-13"><p> <em>GR,</em> 417. <a href="#footnote-ref-13">↑</a></p></li></ol>
+</article>
+</main>
+</body>
+</html>

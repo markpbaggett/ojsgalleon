@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Olay’s Comments on the Event of Meaning in Gadamer’s Hermeneutics</title>
+  <style>
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Design tokens ── */
+  :root {
+    --ink:        #1c2b3a;   /* near-black with a cool undertone            */
+    --ink-light:  #4a5568;   /* secondary text                              */
+    --accent:     #2c5282;   /* ink navy — headings, links, rule accents    */
+    --accent-mid: #4a7fb5;   /* lighter accent for borders                  */
+    --rule:       #d6dde6;   /* subtle dividers                             */
+    --bg-page:    #dde3ea;   /* cool warm-gray page background              */
+    --bg-card:    #ffffff;   /* article card surface                        */
+    --bg-tint:    #f0f4f8;   /* abstract / even-row tint                    */
+    --gold:       #b7860b;   /* warm accent for abstract label, top bar     */
+    --font-serif: "Georgia", "Times New Roman", serif;
+    --shadow-card: 0 2px 8px rgba(0,0,0,.08), 0 8px 32px rgba(0,0,0,.06);
+  }
+
+  /* ── Page shell ── */
+  body {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;    /* ≈ 17px — comfortable for long-form reading  */
+    line-height: 1.8;
+    color: var(--ink);
+    background-color: var(--bg-page);
+    /* Subtle linen-like texture via a repeating gradient */
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,.03) 2px,
+      rgba(255,255,255,.03) 4px
+    );
+    min-height: 100vh;
+    padding: 3rem 1rem 6rem;
+  }
+
+  /* ── Article card ── */
+  article {
+    max-width: 960px;          /* ~letter-page width at screen resolution    */
+    margin-inline: auto;
+    background: var(--bg-card);
+    border-radius: 3px;
+    box-shadow: var(--shadow-card);
+    /* Thin gold accent bar across the top */
+    border-top: 4px solid var(--gold);
+    padding: 3.5rem 5rem 4rem;
+  }
+
+  /* ── Headings ── */
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    color: var(--accent);
+    line-height: 1.2;
+    font-weight: normal;       /* Georgia italic/bold weight managed per level */
+  }
+
+  h1.article-title {
+    font-size: 2rem;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    font-variant: small-caps;
+    letter-spacing: 0.06em;
+    margin-top: 2.5rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  h3 {
+    font-size: 1.05rem;
+    font-style: italic;
+    margin-top: 1.75rem;
+    margin-bottom: 0.35rem;
+    color: var(--ink-light);
+  }
+
+  h4 {
+    font-size: 1rem;
+    font-style: italic;
+    margin-top: 1.25rem;
+    margin-bottom: 0.25rem;
+    color: var(--ink-light);
+  }
+
+  /* ── Body text ── */
+  p {
+    margin-top: 1rem;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+  /* Indent continuation paragraphs — classic book convention */
+  p + p {
+    text-indent: 1.75em;
+    margin-top: 0;
+  }
+  /* But never indent the first paragraph after a heading */
+  h1 + p, h2 + p, h3 + p, h4 + p { text-indent: 0; }
+
+  /* ── Abstract ── */
+  div.abstract {
+    background: var(--bg-tint);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--gold);
+    border-radius: 0 3px 3px 0;
+    padding: 1.25rem 1.5rem;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  div.abstract p { text-indent: 0; margin-top: 0.5rem; }
+  div.abstract p:first-child { margin-top: 0; }
+  div.abstract::before {
+    content: "Abstract";
+    display: block;
+    font-variant: small-caps;
+    letter-spacing: 0.1em;
+    font-size: 0.78rem;
+    color: var(--gold);
+    margin-bottom: 0.6rem;
+  }
+
+  /* ── Tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    overflow: hidden;   /* clip thead corner radius */
+  }
+  th, td {
+    padding: 0.6rem 1rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  thead th {
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-serif);
+    font-variant: small-caps;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    font-weight: normal;
+    border-bottom: 2px solid var(--accent-mid);
+  }
+  tbody tr { border-bottom: 1px solid var(--rule); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) td { background: var(--bg-tint); }
+  tbody tr:hover td { background: #e6edf5; transition: background 0.15s; }
+
+  /* ── Figures & images ── */
+  figure {
+    margin: 2.5rem 0;
+    text-align: center;
+  }
+  figure img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.10);
+  }
+  figcaption {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--ink-light);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* ── Inline ── */
+  strong { font-weight: bold; color: var(--ink); }
+  em     { font-style: italic; }
+  a      { color: var(--accent); text-underline-offset: 3px; }
+  a:hover { color: var(--gold); }
+
+  /* ── Responsive — collapse padding on small screens ── */
+  @media (max-width: 1020px) {
+    article { padding: 2.5rem 3rem 3rem; }
+  }
+  @media (max-width: 640px) {
+    article { padding: 1.5rem 1.25rem 2rem; }
+    h1.article-title { font-size: 1.5rem; }
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { background: #fff; padding: 0; }
+    article {
+      box-shadow: none;
+      border-top: none;
+      padding: 0;
+      max-width: 100%;
+    }
+    a { color: var(--ink); text-decoration: none; }
+    tbody tr:hover td { background: none; }
+  }
+
+  </style>
+</head>
+<body>
+<main>
+<article>
+<h1 class="article-title"><strong>Olay’s Comments on the <em>Event of Meaning in Gadamer’s Hermeneutics</em></strong></h1><p><strong>Csaba Olay</strong></p><p>Eötvös University Budapest<br />olay.csaba@btk.elte.hu</p><h3>ORCID: <a href="https://orcid.org/0000-0001-9713-1418">https://orcid.org/0000-0001-9713-1418</a> </h3><table><tr><td><h4>DOI: <a href="http://doi.org/10.21423/wqr9wt28">http://doi.org/10.21423/wqr9wt28</a> </h4></td></tr></table><h4>Abstract</h4><p>This essay is Csaba Olay’s commentary for a book symposium on the recently published book <em>The Event of Meaning in Gadamer’s Hermeneutics</em> (Routledge 2024) by Carlo DaVia and Greg Lynch presented at the 2025 annual conference of the North American Society for Philosophical Hermeneutics. The essay first sketches the key thesis concerning Gadamer’s event semantics and outlines the structure of the book. Second, it analyzes event semantics in the context of Gadamer’s hermeneutics. Lastly, it focuses on some observations on various consequences and related issues of the authors’ claims.</p><p><strong>Keywords: </strong>Gadamer, Event of Meaning, Hermeneutics, Occasionality, Ideality</p><p>Gadamer’s concept of language was always at the center of Gadamerian scholarship, since its fundamental role in his hermeneutics is beyond doubt. The well-argued and clearly written book, <em>The Event of Meaning in Gadamer’s Hermeneutics </em>(Routledge 2024)<em>, </em>by Carlo DaVia and Greg Lynch is both interesting in itself and also praiseworthy for its systematic ambition. In contrast to Herbert Schnädelbach’s malicious essay––<em>Morbus hermeneuticus. Thesen zu einer philosophischen Krankheit</em>––which, as Adorno’s last assistant, attacked hermeneutics as merely reconstructing historical philosophical positions instead of engaging in autonomous, critical thinking, the book rejects such misinterpretations of what hermeneutics can be. First, I sketch the key thesis concerning Gadamer’s event semantics and outline the structure of the book. Second, I comment on event semantics and its relationship within the framework of Gadamer’s hermeneutics. Lastly, I will make some observations on various consequences and related issues of the authors’ claims.</p><p>The key thesis of the book is indicated in its title: Gadamer’s conception can be understood as a conception of meaning, that is, as a semantic theory in which occasionality and ideality constitute the event of meaning. Unlike what could have been expected, “event” does not refer either to Heidegger’s central concept of <em>Ereignis</em> or to the originally planned title of <em>Truth and method</em>: <em>Verstehen und Geschehen</em> (<em>Understanding and Event</em>). The major steps in the argument are as follows: The first two chapters develop the notions of occasionality and ideality which the authors regard as the pillars of Gadamer’s conception. “Occasionality” in Gadamer’s sense refers to context dependence; thus, it might be asked whether the logic of question and answer better describes what the authors mean or not. “Ideality,” on the other hand, takes into account that meaning must be to some extent “detached” from the particular situations in which it is used. In DaVia’s and Lynch’s reading, Gadamer’s conception is that “meaning exists <em>only in and through</em> the plurality of different occasions on which it is understood.”<sup><a href="#footnote-1" id="footnote-ref-1">[1]</a></sup></p><p>The third chapter presents Gadamer’s theory of interpretation, including the complex issue of the normativity of interpretation. The fourth chapter clarifies Gadamer’s relation to originalism as the position according to which interpretation aims at recovering the original meaning of the text. In doing so, the authors argue that the famous doctrine of “fusion of horizons” is not a moderated version of originalism, but rather concerns the subject matter which the text addresses. The fifth chapter explores aspects of the relationship between events of meaning and the world, while the sixth chapter addresses Gadamer’s view on essences, a traditional central problem of philosophy. DaVia and Lynch maintain that Gadamer defends an essentialism according to which essences are “causes explaining why things necessarily are the way they are.”<sup><a href="#footnote-2" id="footnote-ref-2">[2]</a></sup> Finally, the seventh chapter discusses certain implications of Gadamer’s concept of philosophy, trying to show that philosophy, for him, is still a theoretical undertaking that cannot be resolved in practical reasoning. On the whole, there is a pivotal field that is strikingly marginalized in this reading, namely the domain of art and the philosophy of art.</p><p>The central aim of the book is to make a case for a Gadamerian semantics that the authors call event semantics. They take as point of departure the opposition between hermeneutics and semantics suggested by Gadamer––an opposition which, according to DaVia and Lynch, holds only with respect to “formal semantics” and becomes untenable once semantics is understood in a broader sense of what meaning is. Their project belongs to attempts to bridge philosophical discourses that have sharply diverged in recent decades, namely the discourses of “analytic” and “hermeneutic” or “continental” philosophy. Prominent philosophers such as Karl-Otto Apel and Jürgen Habermas have contributed to this “bridging project,” for whom connecting these traditions was an intrinsic part of their philosophical efforts. An important assumption of these attempts was the conviction that philosophy of language, or the “linguistic turn” in analytic philosophy, constituted the <em>prima philosophia</em>, i.e., the primary or predominant field of philosophical inquiry. After the collapse of this assumption, with the rise of the philosophy of mind (that was previously pushed into the background due to the severe critique of the late Wittgenstein) and cognitive science in the 1970s, analytic philosophy no longer needed to cooperate with European subject-philosophy.</p><p>Be it as it may, the event semantics of Gadamer proposed by DaVia and Lynch states that any hermeneutics implies a semantics, and they claim, furthermore, that no one has undertaken “to reconstruct the account of meaning” underlying Gadamer’s theory, that is, “the semantic implications of his hermeneutics.”<sup><a href="#footnote-3" id="footnote-ref-3">[3]</a></sup> (2). As a consequence, they try to show that Gadamer was “an explicitly semantic thinker all along,”<sup><a href="#footnote-4" id="footnote-ref-4">[4]</a></sup> and, in addition, they present his thought from a new perspective, highlighting aspects that have tended to remain in the background. The systematic interest is praiseworthy so much the more as the authors correctly remark that secondary literature (as well as the literature on Heidegger) is often too repetitive.<sup><a href="#footnote-5" id="footnote-ref-5">[5]</a></sup> (</p><p>DaVia and Lynch think that Gadamer’s semantics might be captured in the claim that meaning is an event, justifying it with the following passage: “Understanding must be conceived as a part of the event of meaning [<em>Sinngeschehen</em>], the event in which the meaning of all statements––those of art and all other kinds of tradition––is formed and actualized.”<sup><a href="#footnote-6" id="footnote-ref-6">[6]</a></sup> On this view, “meaning is something <em>effected</em> or <em>accomplished</em> in language, as opposed to an “abstractable sense,” like a proposition, that language expresses.”<sup><a href="#footnote-7" id="footnote-ref-7">[7]</a></sup> Instead of framing them into relations of representation or signification, according to the authors, “Gadamer thinks of the world, understanding, and language as related to meaning by way of <em>participation</em>. Each element is a participant in the event that meaning is.”<sup><a href="#footnote-8" id="footnote-ref-8">[8]</a></sup> The authors specify these aspects as “events of being,” “events of understanding,” and “events of language.”</p><p>DaVia and Lynch broaden not only the conception of semantics but also the meaning of “language.” They quote Jean Grondin’s interview with Gadamer: “Language in words is only a special concretion of linguisticality.” To grasp the full scope of linguisticality (<em>Sprachlichkeit</em>), we have to keep in mind the “language of the work of art,” “language of gesture, facial expression, and movement,” since all these form fulfil the requirement of language by being “original media in which the world presents itself.”<sup><a href="#footnote-9" id="footnote-ref-9">[9]</a></sup> (9). Thus, the defining characteristic of language and what makes it meaningful is the fact that “in language the world itself presents itself.”<sup><a href="#footnote-10" id="footnote-ref-10">[10]</a></sup> The authors therefore state that, “[m]eaning is an event in which the self-presentation of the world is accomplished.”<sup><a href="#footnote-11" id="footnote-ref-11">[11]</a></sup> </p><p>There are critical remarks to make here. First, an obvious analogy of an event of meaning would be speech acts as described by Austin and Searle. And in fact, DaVia and Lynch conceive of it similarly to speech acts. But Austin and Searle specify previously given forms of speech acts (that is, ways to do something, e.g., to curse, marry someone, to give a name, etc.). It is far from being evident that Gadamer’s description of understanding can be grasped this way, since the individuality of what should be understood is not taken into account. In other words, the question of <em>what</em> it is exactly that is accomplished in the event of meaning seems not to be sufficiently clarified.</p><p>Second, the authors neglect an important influence on Gadamer, namely the phenomenological tradition mediated mostly by Heidegger. One can say that he is elaborating a “phenomenology of understanding” that can be characterized by the primacy of the first-person perspective. Gadamer does not try to look at the process of understanding from above, from a bird’s-eye view; rather, he carefully describes how the meaning of a text or an artwork comes to be understood from the perspective of the interpreter. The unexplored connection to the phenomenological tradition can be observed in passages like Gadamer’s “rejecting the idea that the being of things lies forever beyond the grasp of human understanding, the idea of an unknowable thing-in-itself,” or that “being is self-presentation.”<sup><a href="#footnote-12" id="footnote-ref-12">[12]</a></sup> </p><p>Third, and most importantly, we need to separate more clearly between sentence-level and text-level. And with this distinction in mind, one can see that Gadamer’s hermeneutics is concerned with the text-level. To make this point plain, it is instructive to remind that Frege’s two interdependent principles––the context principle and the semantic compositionality principle––apply only to the sentence level. They make no sense for larger meaningful or significant units like texts and artworks. As is well-known, the semantic compositionality principle says that the meaning of a sentence depends on the meaning of the parts and their connection, while the context principle contends that it is only in the context of a proposition that words have meaning. Frege’s rejection of semantic atomism implies that contextless or isolated words do not mean enough to say something. But Frege did not care about the broader context constituted by a text, since he was convinced that the meaning of the text could be understood by adding the meanings of the single propositions constituting the text. Thus, the attempt to apply the idea of context-dependence to bigger significant units leads to the hermeneutic circle.</p><p>This point can be supported by considering the context principle and the principle of compositionality in their interdependence: Frege urges the exploration of how different linguistic expressions have an effect on the meaning of the sentence. But it is exactly what cannot be done in a systematic or methodologically controlled manner in the case of a text or artwork. There is no method to figure out how an individual phrase, sentence, or proposition contributes to the meaning of the whole–– and this is the kernel of the idea of the hermeneutic circle. On the other hand, Gadamer does not say much about how isolated words have a meaning beyond the fact that “[u]nderstanding how to speak is not yet of itself real understanding and does not involve an interpretive process; it is an accomplishment of life. For you understand a language by living in it.”<sup><a href="#footnote-13" id="footnote-ref-13">[13]</a></sup> </p><p>The position of event semantics is close to radical contextualism which DaVia and Lynch summarize as the following pair of claims: first, “every linguistic expression [. . . ] is <em>context-sensitive</em> in the sense that what the expression means depends in part on the circumstances in which it is deployed,” and second, “this context-sensitivity is <em>irreducible.</em>”<sup><a href="#footnote-14" id="footnote-ref-14">[14]</a></sup> In Gadamer’s hermeneutics, the “occasion” will be what determines the meaning of our utterances, while it cannot be identified as a precise set of discrete facts. The authors claim that to be familiar with the “occasion” includes “the whole topography of our being-in-the-world.”<sup><a href="#footnote-15" id="footnote-ref-15">[15]</a></sup> They quote a strong passage from <em>Truth and Method</em> which is hard to defend: “Every word causes the whole of the language to which it belongs to resonate and the whole world-view that underlies it to appear.”<sup><a href="#footnote-16" id="footnote-ref-16">[16]</a></sup> </p><p>It should be noted that the authors also quote the primacy of question over statements, but not from <em>Truth and Method</em>, and so they neglect the “logic of question and answer” which is not only Collingwood’s idea but also related to Plato’s dialogues. Collingwood is somewhat downplayed, for although he is mentioned, the situational embeddedness of statements is developed without referring to him. DaVia and Lynch contend that this primacy is important for Gadamer as a precondition of understanding. At this point, one could add that Heidegger already saw the task of philosophy in questioning rather than problem solving––the early Aristotle research paper talks about “radical questioning.”<sup><a href="#footnote-17" id="footnote-ref-17">[17]</a></sup></p><p>The authors summarize Gadamer’s conception concerning the problem of understanding across contexts as follows: “language whose meaning is shareable across contexts––namely, language that constitutes the vocative, unified whole of a <em>Gebilde</em> or a text––is such that its meaning is filled out not by the situation in which it was first produced but by the situation in which it is understood. In each of these cases meaning is filled out differently, and this is why we must always [as Gadamer states] ‘understand in a different way, if we understand at all’ (TM, 307/GW 1:302).”<sup><a href="#footnote-18" id="footnote-ref-18">[18]</a></sup> The passage shows that the authors do not want to claim that Gadamer would have an explanation for how a word––not a text––could have a meaning across contexts. And this objection––if it is an objection––might be confirmed from another angle: It is not <em>all</em> texts that need an interpretation, only complex, complicated or “deep” ones or artworks. Reading a manual usually makes no interpretative effort necessary. And this idea we already find in Schleiermacher.</p><p>In the context of Gadamer’s view on essences, it is worth noting that his sympathy with Plato’s doctrine of forms or ideas can be characterized by an option for the one-world interpretation as opposed to the dualistic readings already proposed by Aristotle. A carefully developed statement of this reading has been provided by Wolfgang Wieland in his book <em>Platon und die Formen des Wissens</em> (1982). The key claim of this reading that is relevant for our context is that knowing the ideas or forms (<em>idea</em>, <em>morphe</em>) is not a piece of propositional knowledge but a capacity or skill. This reading of the doctrine of ideas has the great advantage that it avoids the difficulties of supposing that ideas are <em>objects</em>––for example the “third man” argument in the late <em>Parmenides</em>. To clarify the precise relation of this reading of Plato and DaVia and Lynch’s book would go beyond the scope of this review; but it seems to support the view that Gadamer is not hostile to a conception of essences.</p><p>All in all, it is a pleasure and a challenging experience to read this book which presents Gadamer’s hermeneutics from a new angle in a systematic context. Though contestable on various points, the argument of DaVia and Lynch deserves to be taken seriously.</p><h3>Bibliography</h3><p>DaVia, Carlo and Greg Lynch. <em>The Event of Meaning in Gadamer’s Hermeneutics.</em> Routledge, 2024.</p><p>Gadamer, Hans-Georg. <em>Truth and Method</em>. Revised and translated by Joel Weinsheimer and Donald G. Marshall. Bloomsbury, 2013. [<em>TM</em>]</p><p>Olay, Csaba. “Die Überlieferung der Gegenwart und die Gegenwart der Überlieferung. Heidegger und Gadamer über Tradition,” <em>Internationales Jahrbuch für Hermeneutik</em> 7 (2013): 196–219.</p><ol><li id="footnote-1"><p> Carlo DaVia and Greg Lynch, <em>The Event of Meaning in Gadamer’s Hermeneutics </em>(Routledge, 2024), 11. <a href="#footnote-ref-1">↑</a></p></li><li id="footnote-2"><p> DaVia and Lynch, <em>The Event of Meaning, </em>14. <a href="#footnote-ref-2">↑</a></p></li><li id="footnote-3"><p> DaVia and Lynch, <em>The Event of Meaning, </em>2. <a href="#footnote-ref-3">↑</a></p></li><li id="footnote-4"><p> DaVia and Lynch, <em>The Event of Meaning, </em>2. <a href="#footnote-ref-4">↑</a></p></li><li id="footnote-5"><p> DaVia and Lynch, <em>The Event of Meaning, </em>4. <a href="#footnote-ref-5">↑</a></p></li><li id="footnote-6"><p> Hans-Georg Gadamer, <em>Truth and Method</em>, rev. trans. Joel Weinsheimer and Donald G. Marshall. (Bloomsbury, 2013), 164 [hereafter cited as, <em>TM</em>]. <a href="#footnote-ref-6">↑</a></p></li><li id="footnote-7"><p> DaVia and Lynch, <em>The Event of Meaning, </em>6. <a href="#footnote-ref-7">↑</a></p></li><li id="footnote-8"><p> DaVia and Lynch, <em>The Event of Meaning, </em>7. <a href="#footnote-ref-8">↑</a></p></li><li id="footnote-9"><p> DaVia and Lynch, <em>The Event of Meaning, </em>9. <a href="#footnote-ref-9">↑</a></p></li><li id="footnote-10"><p> <em>TM, </em>466. <a href="#footnote-ref-10">↑</a></p></li><li id="footnote-11"><p> DaVia and Lynch, <em>The Event of Meaning, </em>7. <a href="#footnote-ref-11">↑</a></p></li><li id="footnote-12"><p> DaVia and Lynch, <em>The Event of Meaning, </em>7, 9. <a href="#footnote-ref-12">↑</a></p></li><li id="footnote-13"><p> <em>TM, </em>403. <a href="#footnote-ref-13">↑</a></p></li><li id="footnote-14"><p> DaVia and Lynch, <em>The Event of Meaning, </em>16–17. <a href="#footnote-ref-14">↑</a></p></li><li id="footnote-15"><p> DaVia and Lynch, <em>The Event of Meaning, </em>23. <a href="#footnote-ref-15">↑</a></p></li><li id="footnote-16"><p> <em>TM, </em>474. [Quoted in DaVia and Lynch, <em>The Event of Meaning. </em>23.] <a href="#footnote-ref-16">↑</a></p></li><li id="footnote-17"><p> For a detailed account, see my essay: “Die Überlieferung der Gegenwart und die Gegenwart der Überlieferung. Heidegger und Gadamer über Tradition,” <em>Internationales Jahrbuch für Hermeneutik</em> 7 (2013), 196–219. <a href="#footnote-ref-17">↑</a></p></li><li id="footnote-18"><p> DaVia and Lynch, <em>The Event of Meaning, </em>75–76. <a href="#footnote-ref-18">↑</a></p></li></ol>
+</article>
+</main>
+</body>
+</html>

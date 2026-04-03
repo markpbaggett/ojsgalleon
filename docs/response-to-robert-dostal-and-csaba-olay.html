@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Response to Robert Dostal and Csaba Olay</title>
+  <style>
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Design tokens ── */
+  :root {
+    --ink:        #1c2b3a;   /* near-black with a cool undertone            */
+    --ink-light:  #4a5568;   /* secondary text                              */
+    --accent:     #2c5282;   /* ink navy — headings, links, rule accents    */
+    --accent-mid: #4a7fb5;   /* lighter accent for borders                  */
+    --rule:       #d6dde6;   /* subtle dividers                             */
+    --bg-page:    #dde3ea;   /* cool warm-gray page background              */
+    --bg-card:    #ffffff;   /* article card surface                        */
+    --bg-tint:    #f0f4f8;   /* abstract / even-row tint                    */
+    --gold:       #b7860b;   /* warm accent for abstract label, top bar     */
+    --font-serif: "Georgia", "Times New Roman", serif;
+    --shadow-card: 0 2px 8px rgba(0,0,0,.08), 0 8px 32px rgba(0,0,0,.06);
+  }
+
+  /* ── Page shell ── */
+  body {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;    /* ≈ 17px — comfortable for long-form reading  */
+    line-height: 1.8;
+    color: var(--ink);
+    background-color: var(--bg-page);
+    /* Subtle linen-like texture via a repeating gradient */
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,.03) 2px,
+      rgba(255,255,255,.03) 4px
+    );
+    min-height: 100vh;
+    padding: 3rem 1rem 6rem;
+  }
+
+  /* ── Article card ── */
+  article {
+    max-width: 960px;          /* ~letter-page width at screen resolution    */
+    margin-inline: auto;
+    background: var(--bg-card);
+    border-radius: 3px;
+    box-shadow: var(--shadow-card);
+    /* Thin gold accent bar across the top */
+    border-top: 4px solid var(--gold);
+    padding: 3.5rem 5rem 4rem;
+  }
+
+  /* ── Headings ── */
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    color: var(--accent);
+    line-height: 1.2;
+    font-weight: normal;       /* Georgia italic/bold weight managed per level */
+  }
+
+  h1.article-title {
+    font-size: 2rem;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    font-variant: small-caps;
+    letter-spacing: 0.06em;
+    margin-top: 2.5rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  h3 {
+    font-size: 1.05rem;
+    font-style: italic;
+    margin-top: 1.75rem;
+    margin-bottom: 0.35rem;
+    color: var(--ink-light);
+  }
+
+  h4 {
+    font-size: 1rem;
+    font-style: italic;
+    margin-top: 1.25rem;
+    margin-bottom: 0.25rem;
+    color: var(--ink-light);
+  }
+
+  /* ── Body text ── */
+  p {
+    margin-top: 1rem;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+  /* Indent continuation paragraphs — classic book convention */
+  p + p {
+    text-indent: 1.75em;
+    margin-top: 0;
+  }
+  /* But never indent the first paragraph after a heading */
+  h1 + p, h2 + p, h3 + p, h4 + p { text-indent: 0; }
+
+  /* ── Abstract ── */
+  div.abstract {
+    background: var(--bg-tint);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--gold);
+    border-radius: 0 3px 3px 0;
+    padding: 1.25rem 1.5rem;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  div.abstract p { text-indent: 0; margin-top: 0.5rem; }
+  div.abstract p:first-child { margin-top: 0; }
+  div.abstract::before {
+    content: "Abstract";
+    display: block;
+    font-variant: small-caps;
+    letter-spacing: 0.1em;
+    font-size: 0.78rem;
+    color: var(--gold);
+    margin-bottom: 0.6rem;
+  }
+
+  /* ── Tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    overflow: hidden;   /* clip thead corner radius */
+  }
+  th, td {
+    padding: 0.6rem 1rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  thead th {
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-serif);
+    font-variant: small-caps;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    font-weight: normal;
+    border-bottom: 2px solid var(--accent-mid);
+  }
+  tbody tr { border-bottom: 1px solid var(--rule); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) td { background: var(--bg-tint); }
+  tbody tr:hover td { background: #e6edf5; transition: background 0.15s; }
+
+  /* ── Figures & images ── */
+  figure {
+    margin: 2.5rem 0;
+    text-align: center;
+  }
+  figure img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.10);
+  }
+  figcaption {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--ink-light);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* ── Inline ── */
+  strong { font-weight: bold; color: var(--ink); }
+  em     { font-style: italic; }
+  a      { color: var(--accent); text-underline-offset: 3px; }
+  a:hover { color: var(--gold); }
+
+  /* ── Responsive — collapse padding on small screens ── */
+  @media (max-width: 1020px) {
+    article { padding: 2.5rem 3rem 3rem; }
+  }
+  @media (max-width: 640px) {
+    article { padding: 1.5rem 1.25rem 2rem; }
+    h1.article-title { font-size: 1.5rem; }
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { background: #fff; padding: 0; }
+    article {
+      box-shadow: none;
+      border-top: none;
+      padding: 0;
+      max-width: 100%;
+    }
+    a { color: var(--ink); text-decoration: none; }
+    tbody tr:hover td { background: none; }
+  }
+
+  </style>
+</head>
+<body>
+<main>
+<article>
+<h1 class="article-title"><strong>Response to Robert Dostal and Csaba Olay</strong></h1><h3>Book Symposium on <em>The Event of Meaning in Gadamer’s Hermeneutics</em></h3><table><tr><td><p><strong>Carlo DaVia</strong></p><p>University of California, Davis<br /><a href="mailto:cdavia@ucdavis.edu">cdavia@ucdavis.edu</a>  <br /><img src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" /></p><p>ORCID: <a href="https://orcid.org/0000-0001-5416-5458">https://orcid.org/0000-0001-5416-5458</a> </p></td><td><h4>Greg Lynch</h4><p>North Central College<br /><a href="mailto:galynch@noctrl.edu">galynch@noctrl.edu</a> </p><p><br />ORCID: <a href="https://orcid.org/0000-0002-3843-3157">https://orcid.org/0000-0002-3843-3157</a> </p></td></tr><tr><td colspan="2"><h4>DOI: <a href="http://doi.org/10.21423/n1ja8439">http://doi.org/10.21423/n1ja8439</a> </h4></td></tr></table><h4>Abstract</h4><p>This essay is a response by Carlo DaVia and Greg Lynch—authors of the recently published book <em>The Event of Meaning in Gadamer’s Hermeneutics—</em>to two commentators—Robert Dostal and Csaba Olay, presented as part of a book symposium at the 2025 annual conference of the North American Society for Philosophical Hermeneutics. </p><p><strong>Keywords: </strong>Gadamer, Event of Meaning, Hermeneutics, Occasionality, Ideality</p><h3>Introductory Remarks</h3><p>Gadamer argues that the essence of a question is to open possibilities for truth, and the questions raised about our book by Csaba Olay and Bob Dostal have done just that. They have afforded us the opportunity to revisit some of the central themes of our book and to think them through anew and, with any luck, better. We owe Olay and Dostal a debt of gratitude, and hopefully the following responses to their comments further our shared interest not only in Gadamer’s hermeneutics but also in the nature of human understanding more generally. </p><p>Before jumping into our responses, it might be helpful to give a quick summary of the book’s main claim. As Olay points out, our thesis is right there in the title: that Gadamer thinks of meaning as an <em>event</em>. What this means is probably best understood by way of contrast to the more standard view, which sees meaning as an <em>object</em>, a thing. Some equate meaning with an object in the author’s mind—like a communicative intention—others have thought that meanings are mind-independent things like propositions or “ideal species.” But in either case the idea is that for a text or utterance to have a meaning is for it to express one or more of these meaning-objects, and that the goal of interpretation is to figure out <em>which</em> ones it expresses. Gadamer invites us to think differently about all of this. On his view, meaning isn’t a thing that interpreters try to discover when they read, it’s something that <em>happens </em>when they read. Specifically, what happens is that some aspect of the world—what Gadamer calls <em>die Sache</em>, the subject-matter under discussion—makes itself intelligibly present to the reader through the language of the text.</p><p>Why think of meanings as events rather than objects? Gadamer’s main argument for this is to point to the irreducible <em>occasionality</em> or context-dependence of language. Consider a really mundane example: “The cat is on the mat.” Philosophers typically assume that this sentence <em>means</em> something by expressing a particular proposition. And in turn that proposition, just in virtue of the concepts that make it up, paints some reasonably determinate picture of what the world is like. It says “things are <em>this</em> way,” and so whether it is true or false depends simply on whether it turns out that things are that way or not. But this common default picture is full of falsifying abstraction. Suppose before us on the mat there sits a mountain lion. Would it be true to say that the <em>cat</em> is on the mat? Or suppose it is the taxidermied remains of your beloved pet tabby, Mr. Buttons. Or suppose an ordinary housecat is perched on a book which in turn rests on the mat. Or that it sits, smirking, directly atop the shredded remains of what used to be your mat. Considered simply on its own, the proposition “The cat is on the mat” answers none of these questions—which is to say: considered on its own the proposition doesn’t mean anything determinate at all. It does not and cannot tell us <em>what is to count </em>as a “cat,” a “mat,” or as “being on.”</p><p>Meaning, in other words, is not just lying around pre-formed, waiting to be deployed or discovered. It arises—it <em>happens—</em>only when words are woven together with some specific, concrete situation to which they are relevant. You are frantically looking for Mr. Buttons and I say, “Don’t worry, the cat is on the mat.” <em>Now</em> my words mean something. Or, a puma has gotten loose in the house and we’re trying to elude it until animal control arrives. I gesture toward the corner and whisper, “The cat is on the mat.” Here again it means something—now something different from what it meant before. Gadamer’s claim is that <em>all</em> language is occasion-sensitive in this way, and that it is irreducibly so. That is to say, the occasionality of language cannot be eliminated through any program of “translating” or “analyzing” normal speech and writing into some supposed set of logically perfect, context-insensitive terms. </p><h3>Concerns About Occasionality</h3><p>While Olay seems willing to grant our basic claim about occasionality, he worries that we (following Gadamer himself) overstate the case. Gadamer contends that the occasionality of meaning is such that “every word causes the whole of the language to which it belongs to resonate and the whole world-view that underlies it to appear,”<sup><sup><a href="#footnote-1" id="footnote-ref-1">[1]</a></sup></sup> and this strikes Olay as implausibly strong. However, while there is perhaps a bit of hyperbole in Gadamer’s rhetoric here, we think the basic claim is true and important. Gadamer’s point is that the “context” on which meaning depends is not just some discrete set of unnoticed facts about the conversational setting. It is an unexpressed <em>background </em>that includes an infinite number of things that the speaker means but leaves unsaid and a way of being-in-the-world that they accordingly presuppose but do not make explicit. Consider an example in our book that we borrow from John Searle. When we sit down at a restaurant and say “Bring me a steak and potatoes,” we do not also say—indeed, we do not even consider—that the steak should not be brought to us encased in concrete, or be dumped over our heads when it arrives at the table, or be mailed to our place of residence, or be burned before us as an oblation to Zeus. Yet all of this is part of the meaning of the request. A Martian who was not familiar with our form of life—our concerns about hygiene, our principles of etiquette and the moral values on which these are based, the normal manner in which we humans take in nutrition, the norms defining the social role of waiters, and so on—would have no hope of correctly fulfilling even a basic and “obvious” request like this.<sup><sup><a href="#footnote-2" id="footnote-ref-2">[2]</a></sup></sup> Of course, the criteria of relevance here are so familiar to us that we typically take no notice of them, but that does not imply that they are not present. As Gadamer points out repeatedly, the vast majority of what shapes meaning and understanding does so behind our backs.</p><p>This notion of occasionality puts Gadamer in seemingly strange company with some thinkers from the analytic tradition—a tradition which Gadamer himself once described as a “Spanish boot” (i.e., a torture device common during the Inquisition).<sup><sup><a href="#footnote-3" id="footnote-ref-3">[3]</a></sup></sup> Olay voices a number of worries to the effect that highlighting this relationship, as we do in our book, is bound to distort Gadamer’s views, since he approaches the question of meaning from a very different angle than his analytic counterparts.</p><p>First, Olay worries that our characterization of Gadamer’s notion of occasionality makes it all too closely resemble Frege’s “context principle,” a principle which operates only at the sentence level, not that of the text. This resemblance, however, is only superficial. Whatever exactly it is that Frege means by the context principle (and this is the subject of considerable debate), one thing that’s clear is that it is concerned only with the <em>linguistic</em> context in which an expression is situated. Frege’s point is that sub-sentential expressions mean what they do only in light of the complete sentences in which they occur. While Gadamer would certainly not deny this, the sort of context-dependence he has in mind is much more far-reaching. For Gadamer, as the example above indicates, the ‘context’ on which meaning depends includes not just the other words that surround a given expression, but the entire historical, social, and practical <em>situation</em> in which the language appears. Frege does not think that meaning is context-dependent in this sense, and for consistency’s sake he <em>could</em> not think this, since it would bring his formal semantic project to grief. Gadamer, by contrast, argues that every use of language—from the utterance of a single sentence to the writing of an entire text—exhibits this kind of occasionality. Thus, while Olay is undoubtedly right that there are important differences between the “text” and “sentence” levels of discourse, many of which we discuss in the book, we do not think that the mere existence of that distinction undercuts any of the claims we attribute to Gadamer.</p><p>The important connection to be noted between Gadamer’s account of occasionality and the analytic tradition is not Frege but rather (later) Wittgenstein and J. L. Austin, both of whom also argue that language is irreducibly context-dependent. Gadamer himself points out this “convergence” of hermeneutics and ordinary language philosophy in a number of places.<sup><sup><a href="#footnote-4" id="footnote-ref-4">[4]</a></sup></sup> Olay, however, voices some concerns about these relationships.</p><p>With respect to Austin, Olay worries that “speech act theory” is too narrow and rigid to fully capture Gadamer’s account of the situated character of understanding. That’s certainly true, but nothing in the connection we identify between Gadamer and Austin implies otherwise. When we (following Gadamer himself) note that the “performative” character of speech that Austin discusses exemplifies the event-character of meaning, that should not be taken to imply that the two concepts are simply equivalent. We are doubtful that Austin himself thinks that the context-dependence of meaning is <em>exhausted</em> by an account of how an utterance instantiates a conventionally pre-established type of speech act.<sup><sup><a href="#footnote-5" id="footnote-ref-5">[5]</a></sup></sup> But, regardless, Gadamer certainly does not think this, and neither do we. The way the meaning of a word is inflected by its use in commands, promises, apologies, etc., is just one among innumerably many respects in which meaning depends on the situation.</p><p>Before moving on, we’d like to add a more general note, one that’s related but not specifically addressed to Olay’s concerns. When we wrote the book, we knew that talking about Gadamer’s “semantics,” and drawing connections (both by way of comparison and contrast) to thinkers like Wittgenstein, Austin, and Searle, might leave readers with the wrong impression of what we’re up to. Despite our best efforts to ward it off, one might get the idea that our goal in the book is to present an “analytic” Gadamer—to apply his work to some distinctively analytic debate or to recast his ideas so as to make them palatable for an analytically-trained audience. But that’s not the case. The reason we wanted to try to better understand Gadamer’s account of meaning (a task that, regrettably, made use of the loaded term “semantics” unavoidable) is simply that doing so is, in our view, necessary for properly understanding his philosophical project. We have brought “analytic” thinkers to bear on this only where, and to the extent that, we felt doing so helped shed valuable light on what Gadamer is saying. So, while we would be delighted if our book made Gadamer’s thought accessible to a wider swath of philosophers than typically read him, that was at most an ancillary goal. </p><h3>Concerns About Ideality</h3><p>A couple of Dostal’s questions concerned our account of the ideality of meaning, so let us say something about that next. The idea that meaning is context-dependent all the way down raises an obvious worry: if that’s the case, then how could people situated in <em>different</em> contexts ever understand each other? Gadamer’s answer is to point to the ideality of meaning, its ability to “detac[h] itself from the contingency of its origin and its author and ma[ke] itself free for new relationships” (<em>TM</em>, 413). As Dostal observes, to say that meaning is ideal in this way seems to contradict the idea that it is fundamentally occasional. Indeed, that’s precisely the conclusion Husserl drew in the <em>Investigations</em>, which is why he denied that occasionality goes all the way down.</p><p>Gadamer, however, argues that there is a form of ideality that is compatible with occasionality but that Husserl overlooks: what he calls <em>contemporaneity</em>. Something that is contemporaneous is not bound to any one historical situation, but neither does it exist outside of history altogether. It exists rather <em>in and through</em> a variety of different particular occasions and exists only there. </p><p>One of Gadamer’s most helpful models for this is the performing arts. Consider a symphony. For music, Gadamer points out, to be is to resound, and so we cannot equate the work with the score or with an intention in the composer’s mind. The symphony <em>exists</em> only when it is performed. These performances stand in a unique and “highly puzzling” (<em>TM</em>, 126) sort of relationship to one another. Every performance is irreducibly different from every other, and yet it is the <em>same</em> work that is performed each time. Moreover, no one performance has any inherent priority; none has any greater claim to be called “the” symphony than any other. The symphony is <em>fully</em> and <em>originally</em> present in every performance and is present <em>only</em> there.</p><p>In the same way, Gadamer contends, the meaning of a text exists only in and through the diversity of situations in which it is understood. An Ancient Greek reader read and understood Plato’s <em>Symposium</em>, and its subject matter became intelligibly present to her by being applied to her unique situation. You read the text today and the same subject matter makes itself present to you. The same event of meaning occurs again, now in a new and irreducibly different way that is inflected by your particular situation. Gadamer sometimes makes this point in terms of “repetition”:<sup><sup><a href="#footnote-6" id="footnote-ref-6">[6]</a></sup></sup> unlike normal historical events like battles and elections, meaning-events are such that they can be repeated, as the same, across time and place. </p><p>When Dostal asks about the relationship between speech and meaning, we take it that he is asking about the relationship between a particular instance of this repetition and the meaning itself. Are these the same, or are they to be distinguished? The answer is, in a sense, yes to both. Here’s how Gadamer puts it in <em>Truth and Method</em>: “Everything that is language has a speculative unity: it contains a distinction, that between its being and its presentations of itself, but this is a distinction that is really not a distinction at all” (TM, 491). What is the relationship between “Hamlet” and a particular performance of “Hamlet”? In one sense, there is no distinction at all. The performance, if it is a good one, accomplishes a “total mediation” of the work. The work is fully present there in the performance; there is nowhere else where it can be encountered more truly or authentically. And yet, in another sense we can distinguish the work from the performance, insofar as the work can be realized just as totally, yet irreducibly differently, in another performance tomorrow. In the same way, the meaning of a text or utterance is present nowhere more truly than in its appearance to the one who reads and understands. There is no “God’s eye view” to which the text’s <em>Sache</em> would appear more authentically than it does to us. So there is, in one sense, no distinction between the thing and what we see of it when we understand, no room for a phenomena/noumena split. And yet that same thing can show itself differently, in just as true and complete a way, on another occasion. This, we argue, is the key to squaring Gadamer’s claim that understanding discloses the thing itself with his claim that understanding never gives more than an “aspect” of the thing.</p><p>In the book we argue that the “speculative unity” that characterizes contemporaneity is <em>sui generis. </em>That is, it can’t be reduced to some other, more familiar type of ontological relationship. Shaped as they are by 2,000 years of metaphysics, our brains naturally reach for such frameworks to make sense of what Gadamer is talking about, but doing so distorts the phenomena. For example, speculative unity is not just an instance of the universal-particular relationship. Beethoven’s <em>5th</em> is not a type of which the performances are instances. At the concert you hear Beethoven’s <em>5th</em>, not <em>a</em> Beethoven’s <em>5th</em>. Nor is it an instance of the part-whole relationship. If you attend a performance of Beethoven’s <em>5th</em> and listen attentively from start to finish, you would never say that you had heard only <em>part</em> of the symphony. The whole is present in the performance itself. Moreover, what would it even mean to say that Beethoven’s <em>5th</em> is a whole of which the performances are parts? What would this whole consist in? What could it <em>sound</em> like? To what sort of audience could such a thing be present? The same sorts of problems, we want to suggest, attend the idea that the various understandings of a text are but parts of some “whole” that is its meaning.</p><p>One consequence of this is that, while ideality secures a genuine unity amongst the diversity of episodes in which a meaning is understood, that unity is an <em>unprincipled </em>one. It is a unity that contains difference all the way down. That is to say, there is no selfsame formula or rule that can be abstracted out of all the different understandings, no identifiable feature that they all must share in order to count as understandings <em>of</em> the same meaning. No doubt some readers will find this sort of unity unsatisfying. Maybe Dostal is one of those. Here the only response we can offer is in the spirit of Husserl’s dictum to return “to the things themselves,” or Wittgenstein’s “Don’t think, but look!”<sup><sup><a href="#footnote-7" id="footnote-ref-7">[7]</a></sup></sup> That is to say, however much it might seem like there can be real unity only where there is an unchanging principle, our experience belies this fact. We unproblematically recognize unprincipled unities all the time: in the symphony, the festival, in the one law that is applied differently in each case, and so on. If these are legitimate unities, then there is no reason to deny that the unity of meaning across diverse understandings is, too.</p><h3>Concerns About Being</h3><p>Besides the relationship between speech and meaning, Dostal also raises questions about the relationship between meaning and the “what,” i.e., between meaning and being. Dostal suspects that being and meaning are simply equated on our reading of Gadamer, but he is hesitant to go in for such a strong form of idealism himself. It seems to us, however, that Dostal may have misunderstood our view slightly on this point, and that we don’t actually disagree with him, or at least not much as it seems. The root of the issue here is that being is said in many ways, and Dostal may be saying it in a different way than we were in the book. <em>One</em> thing you might mean by “being” is something like “existence,” the <em>fact that</em> something is, and Dostal is certainly right to deny that this can be equated with meaning. Meaning is the event in which a thing makes itself intelligibly present to someone, and quite clearly things can and do exist even when no such event is taking place. Another thing you might mean by “being,” though, is something like the <em>what-ness</em> of something—the <em>way</em> it exists. For Fido: <em>being a dog</em>, <em>being brown, being unruly</em>. Our claim in the book is that, taken in <em>this</em> sense, a thing’s being is identical to its meaning. To ask what it is to be a dog just is to ask what <em>being a dog</em> could mean for us, how it does or could show itself. In other words, there is no gap between what a thing is and the way it presents itself to someone who rightly understands it. </p><p>Accordingly, our view of the relationship between meaning and being is essentially the same as the one that Heidegger voices in the passage that Dostal approvingly cites: that “Being (not entities) is dependent upon the understanding of Being; that is to say, Reality (not the Real) is dependent upon care.”<sup><sup><a href="#footnote-8" id="footnote-ref-8">[8]</a></sup></sup> In other words, were human beings and their memory wiped from the face of the Earth, <em>brute stuff</em> would still exist, but none of that stuff would <em>be</em> anything determinate. Nothing that exists would or could <em>be</em> a table, a chair, or even a beetle or an electron, since, absent occasions structured by human interests and practices, there would be nothing for “being a chair” or “being an electron” to amount to, nothing to demarcate where one way of being stops and another begins.</p><p>The different senses in which the term ‘being’ gets used is also, we argue, the key to reconciling the things that Gadamer says about being in <em>Truth and Method</em> with the seemingly contradictory claims he makes in the late interview with Grondin that Dostal cites. In the former Gadamer seems to say clearly that “being is language” — i.e., that being is to be equated with what comes to presentation in language; with meaning. But in the latter he says quite explicitly that language does not exhaust being, it expresses only that dimension of being that can be understood. Roughly, we think that in the passages from <em>Truth and Method </em>he is talking about <em>Being</em>/<em>Reality</em>; in the interview he is talking about <em>entities</em>/the <em>Real</em>—even though he uses the term <em>being</em> in both cases. So, while Gadamer is perhaps being a little loose with his verbiage here; he isn’t contradicting himself.</p><h3>Concerns About Interpretation</h3><p>Olay and Dostal each express worries about how interpreters participate in the event of meaning as we have laid it out, so let’s turn to those next.</p><p>Olay argues that our account extends the role of interpretation beyond what actually happens in practice. Not everything, he contends, requires interpretation. Some things are obvious and we immediately understand them. Here again we do not disagree, nor does Gadamer. But Gadamer puts the point in slightly different terms. He distinguishes between interpretation that is explicit (<em>ausdrückliche Auslegung</em>) and interpretation that is not (<em>sich Verständnis unmittelbar einstellt</em>) (<em>TM</em>, 416 / <em>GW</em>1, 401–2). But for Gadamer both experiences of understanding—ones that require effort and those that come easily—are acts of interpretation: “All understanding is interpretation” (<em>TM</em>, 407). Again, the occasionality of meaning helps explain why this is so. Even straightforward, everyday utterances like “The cat is on the mat” don’t simply wear their meaning on their sleeves. Understanding them requires recognizing their relevance to the broader situation, and this is an unquestionably interpretive activity, even when it happens effortlessly.</p><p>Dostal, in turn, worries about a distinction we draw between two kinds of explicit interpretation: substantive interpretation and doxastic. Doxastic interpretation, as we characterize it, aims to understand the <em>opinions</em> expressed by a text—whether those opinions belong to the individual author, to a pair of them, or to a broader historical culture or milieu. Doxastic interpretation has ruled the modern hermeneutical roost since Schleiermacher, and it has a plausible ring to it. Don’t we interpret the <em>Nicomachean Ethics</em> in order to understand <em>what Aristotle thinks</em>? Isn’t our goal to discover <em>his views</em> about courage, justice, and the like? For Gadamer, however, such doxastic interpretation is not the primary task we take up when trying to understand a text: “Understanding means, primarily, to understand the content (<em>Sache</em>) of what is said, and only secondarily to isolate and understand another’s meaning as such” (TM, 306).<sup><sup><a href="#footnote-9" id="footnote-ref-9">[9]</a></sup></sup> For Gadamer, the fundamental aim of understanding is to recognize the truth of the subject matter presented by the text, not the opinion of some author or her community. In our terminology, understanding is fundamentally <em>substantive</em>, not doxastic. Gadamer reminds us, moreover, that prior to Schleiermacher, substantive interpretation was the default hermeneutic practice. Readers turned to the <em>Nicomachean Ethics</em> in order to understand what the good life is, not merely Aristotle’s opinions on the subject.</p><p>Why does substantive interpretation enjoy priority over doxastic interpretation? Gadamer gives several reasons, but here’s a big one: language by its nature directs us to the <em>Sache</em>, not the <em>psyche</em>. When, for example, we read a letter, we first take it to be sharing truths about the world, not the opinions of the person who penned it (<em>TM</em>, 305). Indeed, it’s even possible to understand a letter without any awareness of who the author was and without any considerations of their mental states.</p><p>For this reason, we treat language <em>as </em>language, and so treat a text <em>as </em>a text, only when our aim is to discern the truth of the subject matter of which it speaks. As Gadamer says in a late interview, “This is the essence, the soul of my hermeneutics: to understand someone else is to see the justice, the truth, of their position.”<sup><sup><a href="#footnote-10" id="footnote-ref-10">[10]</a></sup></sup> Now, of course, this aim can't always be perfectly fulfilled. Sometimes, try as we might, we can’t construe the text in a way that makes it come out true. In those cases, Gadamer says, we do and should fall back on doxastic interpretation—seeing the text as expressing merely what the author <em>took </em>to be true of the subject matter, not what actually is. But even here interpretation is still oriented toward the <em>Sache</em>. Good doxastic interpretation construes the other’s mistaken opinions as plausibly as it can. Which is to say: it recognizes that there is something <em>about the subject matter</em> that allows it to be misconstrued in this way.</p><p>All that being said, Gadamer notes that it is often legitimate to treat a text as something <em>other</em> than a text, and so to read it with a different aim than that of discovering the truth about its subject matter. This, Gadamer thinks, is what’s going on in historical philology (what Dostal called “philological hermeneutics”). Here, Gadamer contends, the aim is not to discover what a text <em>says</em> but rather what it “betrays” about the psychological or historical situation from which it arose.<sup><sup><a href="#footnote-11" id="footnote-ref-11">[11]</a></sup></sup> Here the text serves as a “source” or clue on the way to discovering, say, Roman attitudes toward sexuality or the use of the enclitic <em>ge </em>in Attic Greek.<sup><sup><a href="#footnote-12" id="footnote-ref-12">[12]</a></sup></sup> </p><p>Gadamer recognizes that discoveries made by historical philology are often useful, and sometimes indispensable, for understanding texts. However, he claims that while these provide us with the historical and lexical information that is needed to begin the task of textual interpretation, they do not engage in textual interpretation themselves. Their aim is not to tell us the meaning of the text, but the meaning of something else—a culture’s values, an author’s outlook—of which the text is a part or an indication.</p><p>If that was all we had said in the book, we would have been fine. But as Dostal points out, we <em>also</em> say at least at one point that historical philology provides us with doxastic interpretations <em>of texts</em>. That claim not only contradicts what we say elsewhere, combined with the other things we claim it really does produce a circle, and probably a vicious one. To this objection we reply: oops! We were being sloppy there and shouldn’t have said that. So we ask for the readers’ help. If you happen to come across the book at your library, please turn to page 96 and cross out the offending passage.</p><h3>What’s Left Unsaid</h3><p>The remaining criticisms expressed by our commentators mostly concern topics (e.g., art), thinkers (e.g. Collingwood, Heidegger), and even entire traditions (e.g., the phenomenological tradition) about which we could, or should, have said more. Here we’d offer two sorts of response. First, with respect to at least some of these topics, we’d argue that the book is not quite as silent as our critics suggest. We do, for example, say quite a bit about how Gadamer’s views emerged out of a (sometimes critical) dialogue with earlier thinkers in the phenomenological tradition. Similarly, Gadamer’s account of art—particularly the performing arts—plays a central role in our reading of ideality, and we discuss it in a fair bit of detail in chapter 2. Nonetheless, it is certainly true that on all the topics Dostal and Olay mentioned there is much more that could be said. In fact, in earlier drafts we did say quite a bit more about many of these, but those discussions ended up on the Google Doc equivalent of the cutting-room floor. In any writing project the author(s) must grapple with the tension between the competing goals of comprehensiveness and focus, and that was no different in our case. In general we probably leaned more toward the “focus” side of this and opted to include only what seemed to us necessary for explaining and defending the central theses of the book. Where those theses indicate lines of inquiry that merit further investigation, we hope that we, or, better, someone more capable than us, will explore them in the future. </p><h3>Bibliography</h3><p>Gadamer, Hans-Georg. “Ethos und Ethik.” In <em>Gesammelte Werke, </em>vol. 3. <em>Neuere Philosophie I: Hegel, Husserl, Heidegger, </em>350–74. Mohr Siebeck, 1987.</p><p>Gadamer, Hans-Georg. <em>Philosophical Hermeneutics</em>. Translated and edited by David E. Linge. University of California Press, 1976.</p><p>Gadamer, Hans-Georg. <em>Truth and Method</em>. 2<sup>nd</sup> rev. ed. Translated and revised by Joel Weinsheimer and Donald G. Marshall. Bloomsbury Academic, 2013.</p><p>Gadamer, Hans-Georg “The 1920s, 1930s, and the Present.” In <em>Hans-Georg Gadamer on Education, Poetry, and History: Applied Hermeneutics</em>, edited by Dieter Misgeld and Graeme Nicholson. Translated by Lawrence Schmidt and Monica Reuss. SUNY Press, 1992.</p><p>Heidegger, Martin. <em>Being and Time</em>. Translated by John Macquarrie and Edward Robinson. Harper &amp; Row, 1962.</p><p>Putnam, Hilary. <em>Reason, Truth, and History</em>. Cambridge University Press, 1981.</p><p>Wittgenstein, Ludwig. <em>Philosophical Investigations</em>. 4<sup>th</sup> ed. Translated by G. E. M. Anscombe, P. M. S. Hacker, and Joachim Schulte. Edited by P. M. S. Hacker and Joachim Schulte. Wiley-Blackwell, 2009.</p><ol><li id="footnote-1"><p> Hans-Georg Gadamer, <em>Truth and Method</em>, 2<sup>nd</sup> rev. ed., trans. and rev. Joel Weinsheimer and Donald G. Marshall (Bloomsbury Academic, 2013), hereafter cited as <em>TM</em>. <a href="#footnote-ref-1">↑</a></p></li><li id="footnote-2"><p> For another helpful example of this, see Hilary Putnam, <em>Reason, Truth, and History</em> (Cambridge University Press, 1981), 201–2. <a href="#footnote-ref-2">↑</a></p></li><li id="footnote-3"><p> Hans-Georg Gadamer, “Ethos und Ethik,” in <em>Gesammelte Werke</em>, vol. 3, <em>Neuere Philosophie I: Hegel, Husserl, Heidegger, </em>350–74 (Mohr Siebeck, 1987), 359. Texts from the <em>Gesammelte Werke</em> are hereafter cited as <em>GW</em>. <a href="#footnote-ref-3">↑</a></p></li><li id="footnote-4"><p> See, for example, Hans-Georg Gadamer, “The Philosophical Foundations of the 20th Century,” in <em>Philosophical Hermeneutics</em>, trans. and ed. David E. Linge (University of California Press, 1976), 127. We cite several other passages in the book (see notes 3, 4, and 5 to chapter 1). <a href="#footnote-ref-4">↑</a></p></li><li id="footnote-5"><p> The view Olay describes sounds to us more like Paul Grice than Austin. But, importantly, the aim of Grice’s analyses of speech acts is to argue <em>against</em> the sort of “radical contextualism” that thinkers like Wittgenstein, Austin, and Gadamer endorse. <a href="#footnote-ref-5">↑</a></p></li><li id="footnote-6"><p> For example, <em>TM</em>, 126. <a href="#footnote-ref-6">↑</a></p></li><li id="footnote-7"><p> Ludwig Wittgenstein, <em>Philosophical Investigations</em>, 4<sup>th</sup> ed., trans. G. E. M. Anscombe, P. M. S. Hacker, and Joachim Schulte, eds. P. M. S. Hacker and Joachim Schulte (Wiley-Blackwell, 2009), §66. <a href="#footnote-ref-7">↑</a></p></li><li id="footnote-8"><p> Martin Heidegger, <em>Being and Time</em>, trans. John Macquarrie and Edward Robinson (Harper &amp; Row, 1962), §43(c). <a href="#footnote-ref-8">↑</a></p></li><li id="footnote-9"><p> In response to Dostal’s question about this passage: the “as such” is an important qualifier here. The point of the passage (and our commentary on it) is not to distinguish the <em>Sache</em> from the meaning. The meaning <em>just is</em> the event of the <em>Sache’s</em> intelligible appearance. Rather, the contrast drawn in this passage is between a way of reading that aims to understand the <em>Sache </em>itself and one that aims merely to identify “<em>another’s</em> meaning,” i.e., merely what the other person <em>thinks</em> or <em>wants to say</em> about the subject matter. <a href="#footnote-ref-9">↑</a></p></li><li id="footnote-10"><p> Hans-Georg Gadamer, “The 1920s, 1930s, and the Present,” in <em>Hans-Georg Gadamer on Education, Poetry, and History: Applied Hermeneutics</em>, eds. Dieter Misgeld and Graeme Nicholson, trans. Lawrence Schmidt and Monica Reuss (SUNY Press, 1992), 152. <a href="#footnote-ref-10">↑</a></p></li><li id="footnote-11"><p> This is what we were getting at with our reference to pp. 344–48 of <em>Truth and Method</em> that Dostal was inquiring about. The key passage is this one: “Thus for the historian it is a basic principle that tradition is to be interpreted in a sense different than the texts, of themselves, call for. He will always go back behind them and the meaning they express to inquire into the reality they express involuntarily.” <a href="#footnote-ref-11">↑</a></p></li><li id="footnote-12"><p> One of Dostal’s questions on the topic of philological hermeneutics is, it appears, based on a simple misunderstanding. Dostal refers to a passage in which we are discussing the worry (raised by Dostal himself in his recent book) that Gadamer’s own hermeneutic practice, which draws readily on historical philology, might contradict his hermeneutic theory. We say, somewhat in passing, that even if this were true, Gadamer’s “failure” to practice what he preaches would not necessarily mean that his theory is incorrect. Dostal wonders why we would call this a failure when Gadamer himself clearly did not think so. However, we go on to argue in the remainder of that chapter that there is <em>not</em> a conflict between his theory and practice in the first place. So Gadamer’s use of philology does not, on our view, constitute any kind of “failure” on his part. Our apologies if we were less than fully clear on that point. <a href="#footnote-ref-12">↑</a></p></li></ol>
+</article>
+</main>
+</body>
+</html>

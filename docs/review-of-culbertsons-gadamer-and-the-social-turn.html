@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gadamer’s Social Epistemology: A Review of Carolyn Culbertson’s Gadamer and the Social Turn in Epistemology</title>
+  <style>
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Design tokens ── */
+  :root {
+    --ink:        #1c2b3a;   /* near-black with a cool undertone            */
+    --ink-light:  #4a5568;   /* secondary text                              */
+    --accent:     #2c5282;   /* ink navy — headings, links, rule accents    */
+    --accent-mid: #4a7fb5;   /* lighter accent for borders                  */
+    --rule:       #d6dde6;   /* subtle dividers                             */
+    --bg-page:    #dde3ea;   /* cool warm-gray page background              */
+    --bg-card:    #ffffff;   /* article card surface                        */
+    --bg-tint:    #f0f4f8;   /* abstract / even-row tint                    */
+    --gold:       #b7860b;   /* warm accent for abstract label, top bar     */
+    --font-serif: "Georgia", "Times New Roman", serif;
+    --shadow-card: 0 2px 8px rgba(0,0,0,.08), 0 8px 32px rgba(0,0,0,.06);
+  }
+
+  /* ── Page shell ── */
+  body {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;    /* ≈ 17px — comfortable for long-form reading  */
+    line-height: 1.8;
+    color: var(--ink);
+    background-color: var(--bg-page);
+    /* Subtle linen-like texture via a repeating gradient */
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,.03) 2px,
+      rgba(255,255,255,.03) 4px
+    );
+    min-height: 100vh;
+    padding: 3rem 1rem 6rem;
+  }
+
+  /* ── Article card ── */
+  article {
+    max-width: 960px;          /* ~letter-page width at screen resolution    */
+    margin-inline: auto;
+    background: var(--bg-card);
+    border-radius: 3px;
+    box-shadow: var(--shadow-card);
+    /* Thin gold accent bar across the top */
+    border-top: 4px solid var(--gold);
+    padding: 3.5rem 5rem 4rem;
+  }
+
+  /* ── Headings ── */
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    color: var(--accent);
+    line-height: 1.2;
+    font-weight: normal;       /* Georgia italic/bold weight managed per level */
+  }
+
+  h1.article-title {
+    font-size: 2rem;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    font-variant: small-caps;
+    letter-spacing: 0.06em;
+    margin-top: 2.5rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  h3 {
+    font-size: 1.05rem;
+    font-style: italic;
+    margin-top: 1.75rem;
+    margin-bottom: 0.35rem;
+    color: var(--ink-light);
+  }
+
+  h4 {
+    font-size: 1rem;
+    font-style: italic;
+    margin-top: 1.25rem;
+    margin-bottom: 0.25rem;
+    color: var(--ink-light);
+  }
+
+  /* ── Body text ── */
+  p {
+    margin-top: 1rem;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+  /* Indent continuation paragraphs — classic book convention */
+  p + p {
+    text-indent: 1.75em;
+    margin-top: 0;
+  }
+  /* But never indent the first paragraph after a heading */
+  h1 + p, h2 + p, h3 + p, h4 + p { text-indent: 0; }
+
+  /* ── Abstract ── */
+  div.abstract {
+    background: var(--bg-tint);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--gold);
+    border-radius: 0 3px 3px 0;
+    padding: 1.25rem 1.5rem;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  div.abstract p { text-indent: 0; margin-top: 0.5rem; }
+  div.abstract p:first-child { margin-top: 0; }
+  div.abstract::before {
+    content: "Abstract";
+    display: block;
+    font-variant: small-caps;
+    letter-spacing: 0.1em;
+    font-size: 0.78rem;
+    color: var(--gold);
+    margin-bottom: 0.6rem;
+  }
+
+  /* ── Tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    overflow: hidden;   /* clip thead corner radius */
+  }
+  th, td {
+    padding: 0.6rem 1rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  thead th {
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-serif);
+    font-variant: small-caps;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    font-weight: normal;
+    border-bottom: 2px solid var(--accent-mid);
+  }
+  tbody tr { border-bottom: 1px solid var(--rule); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) td { background: var(--bg-tint); }
+  tbody tr:hover td { background: #e6edf5; transition: background 0.15s; }
+
+  /* ── Figures & images ── */
+  figure {
+    margin: 2.5rem 0;
+    text-align: center;
+  }
+  figure img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.10);
+  }
+  figcaption {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--ink-light);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* ── Inline ── */
+  strong { font-weight: bold; color: var(--ink); }
+  em     { font-style: italic; }
+  a      { color: var(--accent); text-underline-offset: 3px; }
+  a:hover { color: var(--gold); }
+
+  /* ── Responsive — collapse padding on small screens ── */
+  @media (max-width: 1020px) {
+    article { padding: 2.5rem 3rem 3rem; }
+  }
+  @media (max-width: 640px) {
+    article { padding: 1.5rem 1.25rem 2rem; }
+    h1.article-title { font-size: 1.5rem; }
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { background: #fff; padding: 0; }
+    article {
+      box-shadow: none;
+      border-top: none;
+      padding: 0;
+      max-width: 100%;
+    }
+    a { color: var(--ink); text-decoration: none; }
+    tbody tr:hover td { background: none; }
+  }
+
+  </style>
+</head>
+<body>
+<main>
+<article>
+<h1 class="article-title"><strong>Gadamer’s Social Epistemology: A Review of Carolyn Culbertson’s <em>Gadamer and the Social Turn in Epistemology</em></strong></h1><p><strong>Chaz Holsomback</strong></p><p>University of Dallas<br /><a href="mailto:cmholsomback@udallas.edu">cmholsomback@udallas.edu</a> </p><p>ORCID: <a href="https://orcid.org/0009-0001-1770-5053">https://orcid.org/0009-0001-1770-5053</a></p><table><tr><td><h4>DOI: <a href="https://doi.org/10.21423/yv4v6p36">https://doi.org/10.21423/yv4v6p36</a>  </h4></td></tr></table><h4>Abstract</h4><p>This is a review essay of Carolyn Culbertson’s recent book <em>Gadamer and the Social Turn in Epistemology </em>(SUNY Press, 2024).</p><p><strong>Keywords: </strong>Gadamer, social epistemology, hermeneutic epistemology</p><p>Perhaps the first thing one might say while commenting on Carolyn Culbertson's latest monograph, <em>Gadamer and the Social Turn in Epistemology, </em>is that it is an ambitious work.  Culbertson seeks not only to expound the relevance—and indeed, as we’ll see, the <em>prescience</em>—of Gadamerian hermeneutics for various contemporary social epistemologies, but in order to do so she begins with a careful, and somewhat <em>novel</em>, re-reading of Gadamer’s seminal work, <em>Truth and Method,</em> claiming it is a work of “hermeneutic <em>epistemology.</em>”<sup><a href="#footnote-1" id="footnote-ref-1">[1]</a></sup></p><p>Thus, Culbertson’s thesis is twofold. First, she argues against what she terms the “anti-epistemological”<sup><a href="#footnote-2" id="footnote-ref-2">[2]</a></sup> reading of Gadamer’s <em>Truth and Method</em>, a specific genus of misreadings that have plagued the reception of the work since its publication: namely, those that regard Gadamer’s hermeneutics as a complete abandonment of epistemological claims concerning justified-truth and subject-independent knowledge. Instead, Culbertson contends that the hermeneutic philosophy outlined there—contrary to the influential interpretations of figures as diverse as Emilio Betti, Gianni Vattimo, Richard Rorty, and John Caputo—is, in fact, deeply concerned with epistemological questions of truth and knowledge.<sup><a href="#footnote-3" id="footnote-ref-3">[3]</a></sup> Secondly, Culbertson argues that Gadamer’s re-conception of understanding provides a critical corrective for contemporary social epistemologies. Because, as Culbertson suggests, while these fields successfully establish that knowledge is socially situated, they still, however, lack sufficient <em>ontological</em> grounding when assessing claims of truth—as they often rely on the epistemic virtues of the individual to “measure” veracity. As an intervention, Culbertson turns to what has recently been coined “hermeneutic realism” and points out that Gadamer’s hermeneutics provides the resources necessary to anchor claims of truth and knowledge, not within individual subjectivities, but, rather, in the reality of the subject matter <em>itself </em>(<em>die</em> <em>Sache)</em>.<sup><a href="#footnote-4" id="footnote-ref-4">[4]</a></sup> Along the way Culbertson deftly weaves together the insights of hermeneutic scholarship on aesthetics, education, technology, and language with the personal and political motivations of social, feminist, and justice epistemologies. Gadamer scholars can expect to find no shortage of commentary and critical engagement within the hermeneutic tradition (too numerous to list here). What may be less expected, and worth noting, however, is the wide array of analytic, feminist, and critical race philosophers and theorists that Culbertson interacts on the topic (and, indeed, places Gadamer in direct dialogue with): Linda Martín Alcoff, Hilary Hornblith, Allessandra Tanesini, Donna Harraway, Sandra Harding, Charles Mills, Miranda Fricker, and Jose Medina, to name but a few. The result is a work of remarkable clarity, that builds vital bridges among the disparate philosophical disciplines of continental hermeneutics and contemporary social epistemologies. Ultimately, Culbertson’s <em>Gadamer and the Social Turn in Epistemology, </em>positions Gadamer, not merely as a productive counterpart but, as a <em>forerunner </em>to contemporary social epistemologies—tracing the contours of Gadamer’s philosophical hermeneutics and demonstrating how its emphasis on historical consciousness, situated understanding, and the productivity of prejudice anticipates by decades the concerns that animate the social currents in contemporary analytic, feminist, and justice epistemologies. </p><p>In what follows, I provide a brief analysis of what I find to be the book’s most significant claims and arguments, highlighting those that may be of particular interest to Gadamer scholars. I conclude briefly with a pair of critical, yet charitable, reflections that I hope serve to advance Culbertson’s excellent work.</p><h3>Retrieving Gadamer’s Epistemological Project</h3><p>The first half of the book (Chapters 1–3) consists of Culbertson’s retrieval of Gadamer’s “hermeneutic epistemology.”<sup><a href="#footnote-5" id="footnote-ref-5">[5]</a></sup> This is accomplished primarily by a close reading of <em>Truth and Method</em> meant to demonstrate why Gadamer’s recognition of the limitations of previous epistemological models does not, ultimately, lead to the complete abandonment of all epistemological claims concerning truth and knowledge but, rather, “opens up a space in which to rethink the meaning of these traditional epistemological models.”<sup><a href="#footnote-6" id="footnote-ref-6">[6]</a></sup> Throughout Part One, by Culbertson’s own admission, those already familiar with Gadamer’s hermeneutics will likely be most interested in how she distinguishes her reading from other prominent interpreters, a distinction which hinges on her categorization of those interpretations as “anti-epistemological.” On the one hand, there are those who recognize in Gadamer a commitment to “objective” truth but criticize him for lacking any normative criteria for assessing hermeneutic truth claims—e.g. Betti, Eric D. Hirsch, Karl-Otto Apel. On the other hand, there are<em> </em>those who interpret Gadamer as a harbinger of the demise of traditional philosophical discourse and, thus, as closing off the possibility of normative objectivity altogether—e.g. Vattimo, Rorty, Caputo. Crucially, Culbertson claims that both<em> </em>groups “fail to grasp the way that Gadamer is attempting to rethink not just the process of understanding and not just the mediating factors in this process but <em>the nature of understanding itself</em>.”<sup><a href="#footnote-7" id="footnote-ref-7">[7]</a></sup> </p><p>Against these readings, Culbertson insists that, even though Gadamer challenges the Enlightenment’s “transcendence model”<sup><a href="#footnote-8" id="footnote-ref-8">[8]</a></sup> of knowing—the ideal of the solitary knower achieving “objective,” unbiased knowledge that is free from all prejudice—he does so without falling into the opposite trap of the “immanence model” of knowing, that is, the resignation of relativism in light of historical subjectivity.<sup><a href="#footnote-9" id="footnote-ref-9">[9]</a></sup> Culbertson’s claim is that Gadamer avoids both extremes because his hermeneutics initiates its own kind of normativity and realism respectively. While in a sense, it will require the remainder of the book to fully develop this pair of claims, two critical allies emerge in Culbertson’s rehabilitation of Gadamer’s hermeneutics in Part One, who help carry the analysis forward: Linda Martín Alcoff and Günter Figal. Alcoff serves as an important “translator,” converting the language of Gadamerian hermeneutics into the more analytic style familiar to epistemologists, which also allows Culbertson to move from a descriptive account to a more <em>normative</em> one.<sup><a href="#footnote-10" id="footnote-ref-10">[10]</a></sup> Significantly, Culbertson borrows Alcoff’s notion of “the procedural argument for coherence”<sup><a href="#footnote-11" id="footnote-ref-11">[11]</a></sup> to demonstrate how<em> </em>Gadamerian hermeneutics actually do allow us to achieve a kind of “objectivity,” where our understandings can be assessed, evaluated, validated, and justified ever-new-and-again<em>,</em> in light of our revised fore-conceptions. </p><p>Turning to Figal, Culbertson draws from his important work, <em>Objectivity: The Hermeneutical and Philosophy</em>, for her account of Gadamer's theory of truth in Chapter 3<em>. </em>There Culbertson argues against the constructivist theory of truth, and as a counter argument, deploys Figal to highlight “the importance of the referential character of interpretive activity.”<sup><a href="#footnote-12" id="footnote-ref-12">[12]</a></sup> This means that even while a given interpretation cannot step outside or get beyond the influence of the interpreter’s specific situation, the interpreter is still, nevertheless, encountering something—a text, painting, person, artwork, object, etc.—that “stands over and against them” and is not, in the final analysis, bound by their interpretation.<sup><a href="#footnote-13" id="footnote-ref-13">[13]</a></sup> It is this particular reality—or, subject matter (<em>Sache</em>)—that continually “pushes back” on our interpretations of it. This pushing back, according to Culbertson, is what lends hermeneutic inquiry the grounds for normativity concerning knowledge, justification, and truth while avoiding both naïve realism and skeptical relativism. It would be hard to overstate the significance of this argumentative move for Culbertson’s overall project, as so much of what follows depends on the acceptance of this claim. Thus, Culbertson’s invocation of Figal and hermeneutic realism brings Part One to a close and completes the propaedeutic necessary for the direct engagement with social epistemology. </p><h3>Gadamer’s Relevance for Social Epistemology</h3><p>In Part Two, Culbertson turns more explicitly to the second tenant of her general thesis, which is simple, yet bold: The central insights of various social epistemologies—the recognition that knowledge and understanding are irreducibly social, historical, and situated—was <em>already operative</em> in <em>Truth and Method</em>, albeit clothed in different philosophical garb. Culbertson first surveys the “social turn” in analytic epistemology, tracing the emergence of social epistemology and its challenge to the individualist and cognitivist assumptions of traditional epistemology. Through her analysis, it becomes immediately obvious how the criticisms that emerged in response to social epistemology mirror those that emerged in response to Gadamer’s hermeneutics (outlined by Culbertson in Part One). Culbertson goes on to imply that, like social epistemologists responding to their critics, Gadamer also provided his own sophisticated &quot;weak replacement thesis&quot; (borrowing Hilary Kornblith's terminology),<sup><a href="#footnote-14" id="footnote-ref-14">[14]</a></sup> wherein traditional epistemological categories are not abandoned but reconfigured by the explicit awareness and analysis of historical contexts and social-cultural practices. By Culbertson’s lights, Gadamer’s hermeneutics anticipated many of the insights of later social epistemologists. For example, Gadamer’s rehabilitation of “prejudice” (pre-judgment) prefigures the social epistemologist's insight that background beliefs are necessary conditions for truthful inquiry.<sup><a href="#footnote-15" id="footnote-ref-15">[15]</a></sup></p><p>In Chapter 5, Culbertson resists essentialist readings of feminist epistemology (e.g., &quot;women's ways of knowing&quot;) and argues, instead, that the “doctrine of situated knowledge” reflects a hermeneutic comportment to the lifeworld, one that identifies previously obscured patterns of meaning and renders them visible, even conspicuously so.<sup><a href="#footnote-16" id="footnote-ref-16">[16]</a></sup> Engaging Donna Haraway and Sandra Harding, Culbertson argues that their similar, yet distinct critiques of traditional epistemology resonate with the hermeneutic attunement to the historical and factical conditions of understanding.<sup><a href="#footnote-17" id="footnote-ref-17">[17]</a></sup> One of Culbertson’s more expansive claims comes when she posits that Sandra Bartky’s notion of “feminist consciousness” is, ultimately, an <em>interpretive</em> achievement, and therefore, another form of hermeneutic inquiry.<sup><a href="#footnote-18" id="footnote-ref-18">[18]</a></sup> Culbertson’s description of feminist consciousness is so robustly hermeneutical, that I suspect many hermeneutic scholars will find themselves wondering whether they are feminists after reading it. It is important to recognize that for Culbertson these epistemological interpretations are not retreats into subjectivism but expansions of comprehensiveness (recalling Alcoff’s notion of comprehensive coherence). Throughout, Culbertson relentlessly defends a realist orientation within feminist epistemology, where the epistemic revelation of the marginalized “standpoint” lies in its capacity to generate a more comprehensive, and thus more <em>objective</em>, account of social reality.</p><p>Culbertson’s various argumentative threads concerning Gadamerian hermeneutics and social epistemology come together in the book’s final chapter. There, she argues that social epistemology often struggles to ground normative claims because, in its attempt to avoid the transcendent model’s “view from nowhere,” it appeals to criteria within the knowing subject, and thus falls prey to a version of subjectivism, forsaking its normative footing. Because, while Culbertson is largely sympathetic with “internalism,” she also points out that it “preserves a firm ontological separation between understanding and truth,” which is inconsistent with hermeneutics.<sup><a href="#footnote-19" id="footnote-ref-19">[19]</a></sup> What social epistemology lacks, argues Culbertson, is an <em>ontology</em> that sufficiently anchors its normativity. Culbertson repeatedly reminds the reader of one of the book’s most central claims, from Chapter 3, positing that Gadamerian “truth” is not mere static correspondence but a dynamic, corrective process that remains <em>hermeneutically</em> <em>realist</em> (echoing Figal). Thus, Culbertson proposes that Gadamer’s concept of the truth of understanding provides the missing ontological piece. Citing Miranda Fricker, and her notion of “hermeneutic marginalization,”<sup><a href="#footnote-20" id="footnote-ref-20">[20]</a></sup> Culbertson demonstrates how Gadamer’s hermeneutics provides both the normative leverage <em>and </em>the ontological grounding necessary to identify and remediate gaps in our collective understanding. By reconceiving truth as an event of disclosure and a more comprehensive re-cognition of reality, Culbertson insists that we are able to preserve both determinate knowledge and indeterminate re-interpretations, such that “hermeneutic normativity” becomes possible.<sup><a href="#footnote-21" id="footnote-ref-21">[21]</a></sup> </p><h3>Critical Reflections</h3><p>Culbertson’s synthesis rests on a pair of related proposals: First, that a form of <em>hermeneutic epistemology</em> originates with Gadamer and, second, that this prepares the way for <em>hermeneutic normativity</em>. As previously mentioned, Culbertson primarily relies on Alcoff’s reading of Gadamer as connective tissue and is mostly successful in drawing out these connections across a wide breadth of ideas, domains, and philosophical approaches. However, I nevertheless suspect that the nominalist sensibilities of someone like, say, Rorty or Caputo, might retort with something like the following: To insist that Gadamer’s project is, in fact, epistemological, only <em>by a different name</em>—no matter how well argued—is to beg the question and simply move the goal posts, at best, and self-refuting at worst. While I personally find Culbertson convincing, I do wonder about the persuasiveness of Culbertson’s arguments for those inclined towards the more constructivist extremes of the anti-epistemological reading. (Though, I suppose this says more about such inclinations, than it does about Culbertson’s project.)</p><p>Some readers may wonder about the absence of one of Gadamer’s most consistent and critical interlocutors: Jürgen Habermas. Recall that one of the earliest criticisms of <em>Truth and Method, </em>via Habermas, was that Gadamer’s project—due to its apparent deference to tradition and authority—lacked the necessary resources to identify and challenge oppressive power differentials inherent in and inherited by social institutions, cultural traditions, epistemological structures, and even linguistic practices.<sup><a href="#footnote-22" id="footnote-ref-22">[22]</a></sup> This critique of Gadamer is, substantively, very well aligned with the concerns and motivations of social epistemologies today—and, even explicitly aligned with various feminist critiques of Gadamer’s hermeneutics. And while the engagement with various critical epistemologies does bring the issue of power to the fore, it simply shows Culbertson’s keen awareness that Gadamer has often been criticized for how his views on tradition and authority are thought to inhibit conflict and dissent. In fact, one might reasonably conclude that Culbertson’s opposition to precisely this critique is what seems to motivate the entire work (especially Part II), so it is rather surprising that Habermas is not mentioned even once in the entire volume. </p><p>Nevertheless, I find <em>Gadamer and the Social Turn in Epistemology</em> to be an important and incisive piece of scholarship that repositions philosophical hermeneutics as a vital partner in the project of social epistemology. Culbertson’s rigorous argumentation and her cross-tradition fluency allow her to demonstrate, persuasively, that Gadamer’s hermeneutics offers a normative framework for analyzing epistemic injustice and situated knowledge via the interpretative dimension of human existence, while remaining committed to the ontological truth of disclosure within each new understanding of our shared, and thus ineluctably <em>social</em> reality. </p><p>On the final page Culbertson provides a particularly compelling summation of the work and its motivations, signaling the stakes of the anti-epistemological trends in recent philosophy—and, by extension in recent culture, politics, and society. </p><p>There are some philosophers today and even some readers of Gadamer who are content to move on from the terms <em>truth</em> and <em>knowledge</em>. Ours is, however, not a social-historical situation that permits us to abandon these terms.<sup><a href="#footnote-23" id="footnote-ref-23">[23]</a></sup></p><p>For Culbertson, the stakes seem to be quite high. </p><p>I am sure she is not alone.</p><h3>Bibliography</h3><p>Culbertson, Carolyn. <em>Gadamer and the Social Turn in Epistemology</em>. SUNY Press, 2024.</p><p>Figal, Günter. <em>Objectivity: The Hermeneutical and Philosophy</em>. Translated by Theodore D. George. SUNY Press, 2010.</p><p>Habermas, Jürgen. “The Hermeneutic Claim to Universality.&quot; In <em>The Hermeneutic Tradition: From Ast to Ricoeur</em>. Edited by Gayle L. Ormiston and Alan D. Schrift, 245–72. SUNY Press, 1990.</p><p>George, Theodore. &quot;On Gadamer’s Legacy: Postmodern Hermeneutics, New-Realist Hermeneutics, and the Tension of Understanding.&quot; <em>Journal of the British Society for Phenomenology</em> 56, no. 1 (2025), DOI: <a href="https://www.tandfonline.com/action/showCitFormats?doi=10.1080/00071773.2024.2442113">10.1080/00071773.2024.2442113</a>.</p><ol><li id="footnote-1"><p> Carolyn Culbertson, <em>Gadamer and the Social Turn in Epistemology</em> (SUNY Press, 2024), 11 (emphasis added). <a href="#footnote-ref-1">↑</a></p></li><li id="footnote-2"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>25. <a href="#footnote-ref-2">↑</a></p></li><li id="footnote-3"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>6. <a href="#footnote-ref-3">↑</a></p></li><li id="footnote-4"><p> See especially Chapters 3 and 6 of Culbertson’s work. For more on hermeneutic realism, see also <a id="_Hlk216957142"></a>Günter Figal, <em>Objectivity: The Hermeneutical and Philosophy</em>, trans. Theodore D. George (SUNY Press, 2010); and Theodore George, “On Gadamer’s Legacy: Postmodern Hermeneutics, New-Realist Hermeneutics, and the Tension of Understanding,” <em>Journal of the British Society for Phenomenology</em> 56, no. 1 (2025): 43–56, DOI: <a href="https://www.tandfonline.com/action/showCitFormats?doi=10.1080/00071773.2024.2442113">10.1080/00071773.2024.2442113</a>.</p><p>  <a href="#footnote-ref-4">↑</a></p></li><li id="footnote-5"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>11. <a href="#footnote-ref-5">↑</a></p></li><li id="footnote-6"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>36. <a href="#footnote-ref-6">↑</a></p></li><li id="footnote-7"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>17. <a href="#footnote-ref-7">↑</a></p></li><li id="footnote-8"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>17. <a href="#footnote-ref-8">↑</a></p></li><li id="footnote-9"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>46. <a href="#footnote-ref-9">↑</a></p></li><li id="footnote-10"><p> See especially Chapters 2 and 4. <a href="#footnote-ref-10">↑</a></p></li><li id="footnote-11"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>53. <a href="#footnote-ref-11">↑</a></p></li><li id="footnote-12"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>88. <a href="#footnote-ref-12">↑</a></p></li><li id="footnote-13"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>88; Culbertson cites Figal here. See Figal, <em>Objectivity, </em>2. <a href="#footnote-ref-13">↑</a></p></li><li id="footnote-14"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>109. <a href="#footnote-ref-14">↑</a></p></li><li id="footnote-15"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>145. <a href="#footnote-ref-15">↑</a></p></li><li id="footnote-16"><p> See Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>122–29. <a href="#footnote-ref-16">↑</a></p></li><li id="footnote-17"><p> See Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>123–25. <a href="#footnote-ref-17">↑</a></p></li><li id="footnote-18"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>133. <a href="#footnote-ref-18">↑</a></p></li><li id="footnote-19"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>156. <a href="#footnote-ref-19">↑</a></p></li><li id="footnote-20"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>158. <a href="#footnote-ref-20">↑</a></p></li><li id="footnote-21"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>151. <a href="#footnote-ref-21">↑</a></p></li><li id="footnote-22"><p> See Jürgen Habermas, &quot;The Hermeneutic Claim to Universality,&quot; in <em>The Hermeneutic Tradition: From Ast to Ricoeur</em>, ed. Gayle L. Ormiston and Alan D. Schrift (Albany: State University of New York Press, 1990), 245–72. <a href="#footnote-ref-22">↑</a></p></li><li id="footnote-23"><p> Culbertson, <em>Gadamer and the Social Turn in Epistemology, </em>163. <a href="#footnote-ref-23">↑</a></p></li></ol>
+</article>
+</main>
+</body>
+</html>
