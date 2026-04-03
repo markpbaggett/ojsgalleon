@@ -6,7 +6,7 @@ import tempfile
 import mammoth
 import pypandoc
 
-from ojsgalleon.converters.html_wrap import wrap
+from ojsgalleon.converters.html_wrap import wrap, ai_accessibility_pass
 
 # Matches any <th> tag (with optional attributes) and its content.
 _TH_RE = re.compile(r"<th(\s[^>]*)?>(?P<content>.*?)</th>", re.IGNORECASE | re.DOTALL)
@@ -43,7 +43,7 @@ r[style-name='Emphasis'] => em
 """
 
 
-def docx_to_html(file_bytes: bytes, lang: str = "en", style_overrides: dict[str, str] | None = None) -> tuple[str, list[str]]:
+def docx_to_html(file_bytes: bytes, lang: str = "en", style_overrides: dict[str, str] | None = None, improve_accessibility: bool = False) -> tuple[str, list[str]]:
     """Convert DOCX bytes to a full, accessible HTML5 document.
 
     Returns:
@@ -58,7 +58,12 @@ def docx_to_html(file_bytes: bytes, lang: str = "en", style_overrides: dict[str,
             result = mammoth.convert_to_html(fh, style_map=_STYLE_MAP)
         warnings = [str(m) for m in result.messages]
         fixed = _fix_table_headers(result.value)
-        return wrap(fixed, lang=lang, style_overrides=style_overrides), warnings
+        result = wrap(fixed, lang=lang, style_overrides=style_overrides)
+        if improve_accessibility:
+            result, a11y_warning = ai_accessibility_pass(result)
+            if a11y_warning:
+                warnings.append(a11y_warning)
+        return result, warnings
     finally:
         os.unlink(tmp_path)
 

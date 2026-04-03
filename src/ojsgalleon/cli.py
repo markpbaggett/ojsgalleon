@@ -34,7 +34,7 @@ def cmd_convert(args: argparse.Namespace) -> None:
             result = docx_to_jats(file_bytes)
     else:
         if args.format == "html":
-            result = pdf_to_html(file_bytes, lang=args.lang)
+            result, warnings = pdf_to_html(file_bytes, lang=args.lang)
         else:
             result = pdf_to_jats(file_bytes)
 

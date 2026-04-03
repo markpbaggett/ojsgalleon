@@ -64,7 +64,7 @@ def _generate_alt_text(b64: str, ext: str) -> str:
     )
     return message.content[0].text.strip()
 
-from ojsgalleon.converters.html_wrap import wrap
+from ojsgalleon.converters.html_wrap import wrap, ai_accessibility_pass
 
 _HEADING_WIDTH_RATIO = 0.6
 
@@ -650,7 +650,7 @@ def _extract_elements(pdf_path: str, generate_alt_text: bool = False) -> list[di
     return all_elements
 
 
-def pdf_to_html(file_bytes: bytes, lang: str = "en", generate_alt_text: bool = False, style_overrides: dict[str, str] | None = None) -> str:
+def pdf_to_html(file_bytes: bytes, lang: str = "en", generate_alt_text: bool = False, style_overrides: dict[str, str] | None = None, improve_accessibility: bool = False) -> tuple[str, list[str]]:
     """Convert PDF bytes to a full, accessible HTML5 document."""
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
         tmp.write(file_bytes)
@@ -677,7 +677,13 @@ def pdf_to_html(file_bytes: bytes, lang: str = "en", generate_alt_text: bool = F
                 f'</figure>'
             )
 
-    return wrap("\n".join(parts), lang=lang, style_overrides=style_overrides)
+    warnings: list[str] = []
+    result = wrap("\n".join(parts), lang=lang, style_overrides=style_overrides)
+    if improve_accessibility:
+        result, a11y_warning = ai_accessibility_pass(result)
+        if a11y_warning:
+            warnings.append(a11y_warning)
+    return result, warnings
 
 
 def pdf_to_jats(file_bytes: bytes, generate_alt_text: bool = False) -> str:

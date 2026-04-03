@@ -62,7 +62,7 @@ async def convert_document(
                 converted = docx_to_jats(content)
         else:  # .pdf
             if output_format == OutputFormat.html:
-                converted = pdf_to_html(content, lang=lang)
+                converted, warnings = pdf_to_html(content, lang=lang)
             else:
                 converted = pdf_to_jats(content)
     except Exception as exc:

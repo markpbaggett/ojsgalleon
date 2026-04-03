@@ -115,6 +115,16 @@ _PAGE = """\
             </label>
           </div>
 
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="improve-a11y" name="improve_accessibility"
+                   value="true"
+                   class="h-4 w-4 rounded border-slate-300 text-indigo-600
+                          focus:ring-indigo-500">
+            <label for="improve-a11y" class="text-sm text-slate-700 whitespace-nowrap">
+              AI accessibility review <span class="text-slate-800 text-xs">(HTML only)</span>
+            </label>
+          </div>
+
           <button type="submit" id="convert-btn"
                   class="ml-auto rounded-lg bg-indigo-600 hover:bg-indigo-700
                          text-white font-medium text-sm px-5 py-2 shadow-sm
@@ -287,6 +297,7 @@ async def ui_convert(
     output_format: str = Form("html"),
     lang: str = Form("en"),
     generate_alt_text: str = Form(""),
+    improve_accessibility: str = Form(""),
     cv_text_primary: str = Form("#1c2b3a"),
     cv_accent_primary: str = Form("#2c5282"),
     cv_accent_secondary: str = Form("#4a7fb5"),
@@ -309,6 +320,7 @@ async def ui_convert(
     warnings: list[str] = []
     stem = Path(filename).stem
     use_ai_alt = generate_alt_text == "true"
+    use_a11y = improve_accessibility == "true"
 
     _DEFAULTS = {
         "--ink": "#1c2b3a",
@@ -334,12 +346,12 @@ async def ui_convert(
 
         if ext == ".docx":
             if output_format == "html":
-                result, warnings = docx_to_html(content, lang=lang, style_overrides=style_overrides)
+                result, warnings = docx_to_html(content, lang=lang, style_overrides=style_overrides, improve_accessibility=use_a11y)
             else:
                 result = docx_to_jats(content)
         else:
             if output_format == "html":
-                result = pdf_to_html(content, lang=lang, generate_alt_text=use_ai_alt, style_overrides=style_overrides)
+                result, warnings = pdf_to_html(content, lang=lang, generate_alt_text=use_ai_alt, style_overrides=style_overrides, improve_accessibility=use_a11y)
             else:
                 result = pdf_to_jats(content, generate_alt_text=use_ai_alt)
     except Exception as exc:

@@ -5,11 +5,214 @@ Common errors currently addressed:
 - Missing lang attribute (WCAG 3.1.1)
 """
 
+import os
 import re
+import unicodedata
+from html.parser import HTMLParser
+
+# Typographic characters that Claude may normalise differently from the source.
+_TYPO_MAP = str.maketrans({
+    "\u201c": '"', "\u201d": '"',   # " "  →  "
+    "\u2018": "'", "\u2019": "'",   # ' '  →  '
+    "\u00ab": '"', "\u00bb": '"',   # « »  →  "
+    "\u2014": "-", "\u2013": "-",   # — –  →  -
+    "\u2026": "...",                # …    →  ...
+    "\u00a0": " ",                  # NBSP →  space
+})
 
 
 _HEADING_RE = re.compile(r"<h[1-3][^>]*>(.*?)</h[1-3]>", re.IGNORECASE | re.DOTALL)
 _TAG_RE = re.compile(r"<[^>]+>")
+_B64_SRC_RE = re.compile(r'src="data:[^"]*;base64,[^"]*"')
+_STYLE_BLOCK_RE = re.compile(r"(<style>)(.*?)(</style>)", re.DOTALL)
+
+
+# ── Helpers for the AI accessibility pass ────────────────────────────────────
+
+class _TextExtractor(HTMLParser):
+    """Collect normalised body text nodes from an HTML document.
+
+    Skips tags whose text content the AI accessibility pass is explicitly
+    allowed to create or modify: <script>, <style>, <title>, <caption>,
+    <figcaption>.
+    """
+    _SKIP_TAGS = {"script", "style", "title", "caption", "figcaption"}
+
+    def __init__(self):
+        super().__init__()
+        self._texts: list[str] = []
+        self._skip = False
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self._SKIP_TAGS:
+            self._skip = True
+
+    def handle_endtag(self, tag):
+        if tag in self._SKIP_TAGS:
+            self._skip = False
+
+    def handle_data(self, data):
+        if not self._skip:
+            # Collapse all internal whitespace so minor reformatting by the
+            # model does not count as a content change.
+            normalised = " ".join(data.split())
+            if normalised:
+                self._texts.append(normalised)
+
+
+def _extract_texts(html: str) -> list[str]:
+    p = _TextExtractor()
+    p.feed(html)
+    return p._texts
+
+
+def _body_text(html: str) -> str:
+    """Return all visible body text as one normalised string for comparison.
+
+    - Joined into a single string so structural wrapping (new <span>, <abbr>,
+      etc.) does not count as a content change.
+    - NFKC + typographic normalisation so quote/dash/ellipsis variants that
+      the model may canonicalise differently do not trigger false positives.
+    """
+    raw = " ".join(_extract_texts(html))
+    return unicodedata.normalize("NFKC", raw).translate(_TYPO_MAP)
+
+
+def _strip_heavies(html: str) -> tuple[str, list[str], str]:
+    """Replace base64 image data and the <style> block with placeholders.
+
+    Returns (stripped_html, image_originals, style_original).
+    """
+    images: list[str] = []
+
+    def _img_replacer(m: re.Match) -> str:
+        idx = len(images)
+        images.append(m.group(0))
+        return f'src="data:image/placeholder;base64,IMGPLACEHOLDER{idx}"'
+
+    stripped = _B64_SRC_RE.sub(_img_replacer, html)
+
+    style_original = ""
+    m = _STYLE_BLOCK_RE.search(stripped)
+    if m:
+        style_original = m.group(0)
+        stripped = stripped.replace(style_original, "<style>/* STYLEPLACEHOLDER */</style>")
+
+    return stripped, images, style_original
+
+
+def _restore_heavies(html: str, images: list[str], style_original: str) -> str:
+    for idx, original in enumerate(images):
+        html = html.replace(f'src="data:image/placeholder;base64,IMGPLACEHOLDER{idx}"', original)
+    if style_original:
+        html = html.replace("<style>/* STYLEPLACEHOLDER */</style>", style_original)
+    return html
+
+
+def ai_accessibility_pass(html: str) -> tuple[str, str | None]:
+    """Post-process *html* with Claude Sonnet to improve WCAG 2.1 AA / ADA Title 2 compliance.
+
+    Only attribute-level and structural changes are permitted — text content is
+    never modified. If the model changes any text the result is discarded and
+    the original is returned unchanged.
+
+    Returns:
+        (html, warning) — warning is None on success, or a message string if
+        the pass was skipped, discarded, or failed.
+    """
+    try:
+        import anthropic
+    except ImportError:
+        return html, "AI accessibility review skipped: 'anthropic' package not installed."
+
+    api_key = os.environ.get("CLAUDE_API")
+    if not api_key:
+        return html, "AI accessibility review skipped: CLAUDE_API environment variable not set."
+
+    stripped, images, style_original = _strip_heavies(html)
+    original_body = _body_text(stripped)
+
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        with client.messages.stream(
+            model="claude-sonnet-4-6",
+            max_tokens=64000,
+            system=(
+                "You are an HTML accessibility specialist. Your task is to improve an HTML document "
+                "for ADA Title 2 and WCAG 2.1 AA compliance using only structural and attribute-level edits. "
+                "Return the complete improved HTML document with no explanation or commentary."
+            ),
+            messages=[
+                {
+                    "role": "user",
+                    "content": (
+                        "Improve the accessibility of this HTML document for ADA Title 2 and "
+                        "WCAG 2.1 AA compliance. Follow these rules strictly:\n\n"
+                        "NEVER allowed:\n"
+                        "- Do not change, add, or remove text inside <p>, <h1>–<h6>, <li>, <td>, "
+                        "<th>, <span>, <a>, <em>, <strong>, or any other body element — "
+                        "not a single word or character\n\n"
+                        "ALLOWED attribute changes:\n"
+                        "- Add or modify: aria-label, aria-labelledby, aria-describedby, "
+                        "aria-hidden, aria-expanded, aria-controls, role, scope, lang, "
+                        "tabindex, headers, for, id\n"
+                        "- Fix heading hierarchy by changing heading levels (h1–h6)\n"
+                        "- Change <td> to <th> where a cell is clearly a column or row header\n\n"
+                        "ALLOWED text additions (these specific elements only):\n"
+                        "- Add a <caption> to a table that lacks one — caption text must be "
+                        "a concise description derived from visible context, not invented\n"
+                        "- Add or update a <figcaption> inside a <figure> that lacks one\n"
+                        "- Update the <title> element to be more descriptive if it is generic\n\n"
+                        f"{stripped}"
+                    ),
+                }
+            ],
+        ) as stream:
+            response = stream.get_final_message()
+    except Exception as exc:
+        return html, f"AI accessibility review failed: {exc}"
+
+    if response.stop_reason == "max_tokens":
+        return html, (
+            "AI accessibility review was discarded: the response was truncated "
+            "(document too large for a single pass). Original document returned."
+        )
+
+    improved = response.content[0].text.strip()
+    # Strip markdown code fences (Claude sometimes wraps output in ```html ... ```)
+    if improved.startswith("```"):
+        improved = re.sub(r"^```[^\n]*\n", "", improved)
+        improved = re.sub(r"\n```\s*$", "", improved)
+        improved = improved.strip()
+
+    # Hard safety guard: discard output if any body text content changed.
+    improved_body = _body_text(improved)
+    if improved_body != original_body:
+        hint = _diff_hint(original_body, improved_body)
+        return html, (
+            f"AI accessibility review was discarded: the model modified text content{hint}. "
+            "Original document returned."
+        )
+
+    return _restore_heavies(improved, images, style_original), None
+
+
+def _diff_hint(before: str, after: str) -> str:
+    """Return a short diagnostic string showing the first word-level difference.
+
+    Both strings should already be the output of _body_text() so typographic
+    normalisation has been applied before this comparison.
+    """
+    bw = before.split()
+    aw = after.split()
+    for i, (b, a) in enumerate(zip(bw, aw)):
+        if b != a:
+            start = max(0, i - 2)
+            snippet = " ".join(bw[start : i + 3])
+            return f' (near: "{snippet}" → "{a}")'
+    if len(bw) != len(aw):
+        return f" (word count changed: {len(bw)} → {len(aw)})"
+    return ""
 
 
 def _extract_title(html_fragment: str, fallback: str) -> str:

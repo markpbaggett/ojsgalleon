@@ -131,7 +131,7 @@ class TestPdfToHtmlContent:
     def test_schack_title_is_not_split(self):
         """Title words that span the gutter must end up in the same element."""
         from ojsgalleon.converters.pdf import pdf_to_html
-        html = pdf_to_html(SCHACK.read_bytes())
+        html, _ = pdf_to_html(SCHACK.read_bytes())
         # 'Compassion in practice' and 'Enhancing sustainability' are on the
         # same line in the PDF; they must appear in the same <p>.
         assert "Compassion in practice" in html
@@ -146,25 +146,25 @@ class TestPdfToHtmlContent:
 
     def test_schack_has_introduction_section(self):
         from ojsgalleon.converters.pdf import pdf_to_html
-        html = pdf_to_html(SCHACK.read_bytes())
+        html, _ = pdf_to_html(SCHACK.read_bytes())
         assert "Introduction" in html
 
     def test_owings_abstract_present(self):
         from ojsgalleon.converters.pdf import pdf_to_html
-        html = pdf_to_html(OWINGS.read_bytes())
+        html, _ = pdf_to_html(OWINGS.read_bytes())
         assert "Abstract" in html or "abstract" in html.lower()
 
     def test_owings_left_then_right_reading_order(self):
         """In Owings, 'Introduction' (left col heading) must appear before
         'Methods' (later section heading)."""
         from ojsgalleon.converters.pdf import pdf_to_html
-        html = pdf_to_html(OWINGS.read_bytes())
+        html, _ = pdf_to_html(OWINGS.read_bytes())
         assert html.index("Introduction") < html.index("Methods")
 
     def test_owings_no_running_footer(self):
         """The journal footer that repeats across pages must be suppressed."""
         from ojsgalleon.converters.pdf import pdf_to_html
-        html = pdf_to_html(OWINGS.read_bytes())
+        html, _ = pdf_to_html(OWINGS.read_bytes())
         # The footer line appears on multiple pages; suppression means it
         # should appear at most once (first-page header is kept).
         count = html.lower().count("journal of forensic entomology")
@@ -172,7 +172,7 @@ class TestPdfToHtmlContent:
 
     def test_davey_single_column_produces_output(self):
         from ojsgalleon.converters.pdf import pdf_to_html
-        html = pdf_to_html(DAVEY.read_bytes())
+        html, _ = pdf_to_html(DAVEY.read_bytes())
         assert len(html) > 500
 
 
@@ -185,19 +185,19 @@ class TestAccessibility:
     @pytest.mark.parametrize("pdf_path", [OWINGS, SCHACK, DAVEY])
     def test_html_lang_attribute(self, pdf_path):
         from ojsgalleon.converters.pdf import pdf_to_html
-        html = pdf_to_html(pdf_path.read_bytes())
+        html, _ = pdf_to_html(pdf_path.read_bytes())
         assert '<html lang="' in html, "Missing lang attribute on <html> (WCAG 3.1.1)"
 
     @pytest.mark.parametrize("pdf_path", [OWINGS, SCHACK, DAVEY])
     def test_html_has_title(self, pdf_path):
         from ojsgalleon.converters.pdf import pdf_to_html
-        html = pdf_to_html(pdf_path.read_bytes())
+        html, _ = pdf_to_html(pdf_path.read_bytes())
         assert "<title>" in html and "</title>" in html, "Missing <title> element (WCAG 2.4.2)"
 
     @pytest.mark.parametrize("pdf_path", [OWINGS, SCHACK, DAVEY])
     def test_no_empty_th(self, pdf_path):
         from ojsgalleon.converters.pdf import pdf_to_html
-        html = pdf_to_html(pdf_path.read_bytes())
+        html, _ = pdf_to_html(pdf_path.read_bytes())
         assert "<th></th>" not in html and "<th> </th>" not in html, (
             "Empty <th> found — violates ADA Title II / WCAG 1.3.1"
         )
