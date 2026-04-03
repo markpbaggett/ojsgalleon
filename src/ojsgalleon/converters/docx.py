@@ -43,7 +43,7 @@ r[style-name='Emphasis'] => em
 """
 
 
-def docx_to_html(file_bytes: bytes, lang: str = "en") -> tuple[str, list[str]]:
+def docx_to_html(file_bytes: bytes, lang: str = "en", style_overrides: dict[str, str] | None = None) -> tuple[str, list[str]]:
     """Convert DOCX bytes to a full, accessible HTML5 document.
 
     Returns:
@@ -58,7 +58,7 @@ def docx_to_html(file_bytes: bytes, lang: str = "en") -> tuple[str, list[str]]:
             result = mammoth.convert_to_html(fh, style_map=_STYLE_MAP)
         warnings = [str(m) for m in result.messages]
         fixed = _fix_table_headers(result.value)
-        return wrap(fixed, lang=lang), warnings
+        return wrap(fixed, lang=lang, style_overrides=style_overrides), warnings
     finally:
         os.unlink(tmp_path)
 

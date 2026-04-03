@@ -650,7 +650,7 @@ def _extract_elements(pdf_path: str, generate_alt_text: bool = False) -> list[di
     return all_elements
 
 
-def pdf_to_html(file_bytes: bytes, lang: str = "en", generate_alt_text: bool = False) -> str:
+def pdf_to_html(file_bytes: bytes, lang: str = "en", generate_alt_text: bool = False, style_overrides: dict[str, str] | None = None) -> str:
     """Convert PDF bytes to a full, accessible HTML5 document."""
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
         tmp.write(file_bytes)
@@ -677,7 +677,7 @@ def pdf_to_html(file_bytes: bytes, lang: str = "en", generate_alt_text: bool = F
                 f'</figure>'
             )
 
-    return wrap("\n".join(parts), lang=lang)
+    return wrap("\n".join(parts), lang=lang, style_overrides=style_overrides)
 
 
 def pdf_to_jats(file_bytes: bytes, generate_alt_text: bool = False) -> str:

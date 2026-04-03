@@ -34,7 +34,7 @@ _CSS = """\
     --bg-page:    #dde3ea;   /* cool warm-gray page background              */
     --bg-card:    #ffffff;   /* article card surface                        */
     --bg-tint:    #f0f4f8;   /* abstract / even-row tint                    */
-    --gold:       #b7860b;   /* warm accent for abstract label, top bar     */
+    --warm-accent: #b7860b;  /* warm accent for abstract label, top bar     */
     --font-serif: "Georgia", "Times New Roman", serif;
     --shadow-card: 0 2px 8px rgba(0,0,0,.08), 0 8px 32px rgba(0,0,0,.06);
   }
@@ -66,7 +66,7 @@ _CSS = """\
     border-radius: 3px;
     box-shadow: var(--shadow-card);
     /* Thin gold accent bar across the top */
-    border-top: 4px solid var(--gold);
+    border-top: 4px solid var(--warm-accent);
     padding: 3.5rem 5rem 4rem;
   }
 
@@ -83,7 +83,7 @@ _CSS = """\
     letter-spacing: -0.01em;
     margin-bottom: 1.5rem;
     color: var(--ink);
-    border-bottom: 2px solid var(--gold);
+    border-bottom: 2px solid var(--warm-accent);
     padding-bottom: 0.75rem;
   }
 
@@ -131,7 +131,7 @@ _CSS = """\
   div.abstract {
     background: var(--bg-tint);
     border: 1px solid var(--rule);
-    border-left: 4px solid var(--gold);
+    border-left: 4px solid var(--warm-accent);
     border-radius: 0 3px 3px 0;
     padding: 1.25rem 1.5rem;
     margin: 2rem 0;
@@ -146,7 +146,7 @@ _CSS = """\
     font-variant: small-caps;
     letter-spacing: 0.1em;
     font-size: 0.78rem;
-    color: var(--gold);
+    color: var(--warm-accent);
     margin-bottom: 0.6rem;
   }
 
@@ -205,7 +205,7 @@ _CSS = """\
   strong { font-weight: bold; color: var(--ink); }
   em     { font-style: italic; }
   a      { color: var(--accent); text-underline-offset: 3px; }
-  a:hover { color: var(--gold); }
+  a:hover { color: var(--warm-accent); }
 
   /* ── Responsive — collapse padding on small screens ── */
   @media (max-width: 1020px) {
@@ -231,7 +231,12 @@ _CSS = """\
 """
 
 
-def wrap(html_fragment: str, title: str = "", lang: str = "en") -> str:
+def wrap(
+    html_fragment: str,
+    title: str = "",
+    lang: str = "en",
+    style_overrides: dict[str, str] | None = None,
+) -> str:
     """Wrap *html_fragment* in a full, accessible HTML5 document.
 
     Args:
@@ -239,8 +244,18 @@ def wrap(html_fragment: str, title: str = "", lang: str = "en") -> str:
         title: Page title. If empty, the first heading in the fragment is used.
                Falls back to "Converted Document".
         lang: BCP 47 language tag for the html[lang] attribute (default "en").
+        style_overrides: Optional mapping of CSS variable names to values,
+                         e.g. {"--accent": "#c0392b"}. These are injected as a
+                         second :root block that overrides the defaults.
     """
     resolved_title = title or _extract_title(html_fragment, "Converted Document")
+
+    override_block = ""
+    if style_overrides:
+        declarations = "\n".join(
+            f"    {var}: {val};" for var, val in style_overrides.items()
+        )
+        override_block = f"\n  <style>\n  :root {{\n{declarations}\n  }}\n  </style>"
 
     return f"""\
 <!DOCTYPE html>
@@ -251,7 +266,7 @@ def wrap(html_fragment: str, title: str = "", lang: str = "en") -> str:
   <title>{resolved_title}</title>
   <style>
 {_CSS}
-  </style>
+  </style>{override_block}
 </head>
 <body>
 <main>

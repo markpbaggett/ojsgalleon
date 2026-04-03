@@ -122,18 +122,90 @@ _PAGE = """\
                          focus:ring-indigo-500 focus:ring-offset-2">
             Convert
           </button>
+        </div>
 
-          <!-- Spinner (shown during HTMX request) -->
-          <div id="spinner" class="htmx-indicator items-center gap-2 text-slate-500 text-sm">
-            <svg class="animate-spin h-4 w-4 text-indigo-500"
-                 fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10"
-                      stroke="currentColor" stroke-width="4"/>
-              <path class="opacity-75" fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8H4z"/>
+        <!-- ── Style panel ───────────────────────────────────────────────── -->
+        <details class="mt-4 rounded-lg border border-slate-200 bg-slate-50">
+          <summary class="cursor-pointer select-none px-4 py-2.5 text-xs font-medium
+                          text-slate-500 uppercase tracking-wide list-none
+                          flex items-center justify-between
+                          [&::-webkit-details-marker]:hidden">
+            <span>Galley styles</span>
+            <svg class="w-4 h-4 transition-transform details-chevron" fill="none"
+                 stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 9l-7 7-7-7"/>
             </svg>
-            Converting…
+          </summary>
+          <div class="px-4 pb-4 pt-2 grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-3">
+
+            <div>
+              <label for="cv-text-primary" class="block text-xs text-slate-500 mb-1">Text</label>
+              <div class="flex items-center gap-2">
+                <input type="color" id="cv-text-primary" name="cv_text_primary" value="#1c2b3a"
+                       class="h-8 w-10 rounded border border-slate-300 cursor-pointer p-0.5">
+                <span class="text-xs text-slate-400 font-mono">--ink</span>
+              </div>
+            </div>
+
+            <div>
+              <label for="cv-accent-primary" class="block text-xs text-slate-500 mb-1">Accent (headings &amp; links)</label>
+              <div class="flex items-center gap-2">
+                <input type="color" id="cv-accent-primary" name="cv_accent_primary" value="#2c5282"
+                       class="h-8 w-10 rounded border border-slate-300 cursor-pointer p-0.5">
+                <span class="text-xs text-slate-400 font-mono">--accent</span>
+              </div>
+            </div>
+
+            <div>
+              <label for="cv-accent-secondary" class="block text-xs text-slate-500 mb-1">Accent (borders)</label>
+              <div class="flex items-center gap-2">
+                <input type="color" id="cv-accent-secondary" name="cv_accent_secondary" value="#4a7fb5"
+                       class="h-8 w-10 rounded border border-slate-300 cursor-pointer p-0.5">
+                <span class="text-xs text-slate-400 font-mono">--accent-mid</span>
+              </div>
+            </div>
+
+            <div>
+              <label for="cv-warm-accent" class="block text-xs text-slate-500 mb-1">Warm accent</label>
+              <div class="flex items-center gap-2">
+                <input type="color" id="cv-warm-accent" name="cv_warm_accent" value="#b7860b"
+                       class="h-8 w-10 rounded border border-slate-300 cursor-pointer p-0.5">
+                <span class="text-xs text-slate-400 font-mono">--warm-accent</span>
+              </div>
+            </div>
+
+            <div>
+              <label for="cv-background" class="block text-xs text-slate-500 mb-1">Page background</label>
+              <div class="flex items-center gap-2">
+                <input type="color" id="cv-background" name="cv_background" value="#dde3ea"
+                       class="h-8 w-10 rounded border border-slate-300 cursor-pointer p-0.5">
+                <span class="text-xs text-slate-400 font-mono">--bg-page</span>
+              </div>
+            </div>
+
+            <div>
+              <label for="cv-surface" class="block text-xs text-slate-500 mb-1">Article surface</label>
+              <div class="flex items-center gap-2">
+                <input type="color" id="cv-surface" name="cv_surface" value="#ffffff"
+                       class="h-8 w-10 rounded border border-slate-300 cursor-pointer p-0.5">
+                <span class="text-xs text-slate-400 font-mono">--bg-card</span>
+              </div>
+            </div>
+
           </div>
+        </details>
+
+        <!-- Spinner (shown during HTMX request) -->
+        <div id="spinner" class="htmx-indicator items-center gap-2 text-slate-500 text-sm mt-3">
+          <svg class="animate-spin h-4 w-4 text-indigo-500"
+               fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10"
+                    stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"/>
+          </svg>
+          Converting…
         </div>
       </form>
     </div>
@@ -215,6 +287,12 @@ async def ui_convert(
     output_format: str = Form("html"),
     lang: str = Form("en"),
     generate_alt_text: str = Form(""),
+    cv_text_primary: str = Form("#1c2b3a"),
+    cv_accent_primary: str = Form("#2c5282"),
+    cv_accent_secondary: str = Form("#4a7fb5"),
+    cv_warm_accent: str = Form("#b7860b"),
+    cv_background: str = Form("#dde3ea"),
+    cv_surface: str = Form("#ffffff"),
 ):
     filename = file.filename or "document"
     ext = Path(filename).suffix.lower()
@@ -232,18 +310,36 @@ async def ui_convert(
     stem = Path(filename).stem
     use_ai_alt = generate_alt_text == "true"
 
+    _DEFAULTS = {
+        "--ink": "#1c2b3a",
+        "--accent": "#2c5282",
+        "--accent-mid": "#4a7fb5",
+        "--warm-accent": "#b7860b",
+        "--bg-page": "#dde3ea",
+        "--bg-card": "#ffffff",
+    }
+    submitted = {
+        "--ink": cv_text_primary,
+        "--accent": cv_accent_primary,
+        "--accent-mid": cv_accent_secondary,
+        "--warm-accent": cv_warm_accent,
+        "--bg-page": cv_background,
+        "--bg-card": cv_surface,
+    }
+    style_overrides = {var: val for var, val in submitted.items() if val != _DEFAULTS[var]} or None
+
     try:
         from ojsgalleon.converters.docx import docx_to_html, docx_to_jats
         from ojsgalleon.converters.pdf import pdf_to_html, pdf_to_jats
 
         if ext == ".docx":
             if output_format == "html":
-                result, warnings = docx_to_html(content, lang=lang)
+                result, warnings = docx_to_html(content, lang=lang, style_overrides=style_overrides)
             else:
                 result = docx_to_jats(content)
         else:
             if output_format == "html":
-                result = pdf_to_html(content, lang=lang, generate_alt_text=use_ai_alt)
+                result = pdf_to_html(content, lang=lang, generate_alt_text=use_ai_alt, style_overrides=style_overrides)
             else:
                 result = pdf_to_jats(content, generate_alt_text=use_ai_alt)
     except Exception as exc:
