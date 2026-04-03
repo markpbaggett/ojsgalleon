@@ -7,6 +7,7 @@ Common errors currently addressed:
 
 import os
 import re
+import string
 import unicodedata
 from html.parser import HTMLParser
 
@@ -70,12 +71,17 @@ def _body_text(html: str) -> str:
     """Return all visible body text as one normalised string for comparison.
 
     - Joined into a single string so structural wrapping (new <span>, <abbr>,
-      etc.) does not count as a content change.
+      <cite>, etc.) does not count as a content change.
     - NFKC + typographic normalisation so quote/dash/ellipsis variants that
       the model may canonicalise differently do not trigger false positives.
+    - Punctuation stripped from word boundaries so that Claude moving a title
+      into a <cite> element (which drops the surrounding quotation marks) does
+      not count as a content change.
     """
     raw = " ".join(_extract_texts(html))
-    return unicodedata.normalize("NFKC", raw).translate(_TYPO_MAP)
+    normalised = unicodedata.normalize("NFKC", raw).translate(_TYPO_MAP)
+    words = [w.strip(string.punctuation) for w in normalised.split()]
+    return " ".join(w for w in words if w)
 
 
 def _strip_heavies(html: str) -> tuple[str, list[str], str]:
@@ -96,16 +102,25 @@ def _strip_heavies(html: str) -> tuple[str, list[str], str]:
     m = _STYLE_BLOCK_RE.search(stripped)
     if m:
         style_original = m.group(0)
-        stripped = stripped.replace(style_original, "<style>/* STYLEPLACEHOLDER */</style>")
+        stripped = stripped.replace(
+            style_original,
+            '<style>/* MAIN_STYLE_STRIPPED — do not modify this block; '
+            'add all new accessibility CSS in a separate style block '
+            'with id="a11y-overrides" */</style>',
+        )
 
     return stripped, images, style_original
 
+
+_STYLE_PLACEHOLDER_RE = re.compile(
+    r'<style>[^<]*MAIN_STYLE_STRIPPED[^<]*</style>', re.DOTALL
+)
 
 def _restore_heavies(html: str, images: list[str], style_original: str) -> str:
     for idx, original in enumerate(images):
         html = html.replace(f'src="data:image/placeholder;base64,IMGPLACEHOLDER{idx}"', original)
     if style_original:
-        html = html.replace("<style>/* STYLEPLACEHOLDER */</style>", style_original)
+        html = _STYLE_PLACEHOLDER_RE.sub(style_original, html, count=1)
     return html
 
 
@@ -138,31 +153,59 @@ def ai_accessibility_pass(html: str) -> tuple[str, str | None]:
             model="claude-sonnet-4-6",
             max_tokens=64000,
             system=(
-                "You are an HTML accessibility specialist. Your task is to improve an HTML document "
-                "for ADA Title 2 and WCAG 2.1 AA compliance using only structural and attribute-level edits. "
-                "Return the complete improved HTML document with no explanation or commentary."
+                "You are an accessibility remediation assistant for OJS (Open Journal Systems) "
+                "HTML galleys. Your task is to take a raw HTML galley as input and return a "
+                "corrected version that conforms to WCAG 2.1 Level AA and ADA Title II requirements. "
+                "Return only the complete, corrected HTML document. "
+                "Annotate every change with an inline HTML comment in this format: "
+                "<!-- FIX #[number] ([WCAG criterion]): [one-sentence explanation] -->"
             ),
             messages=[
                 {
                     "role": "user",
                     "content": (
-                        "Improve the accessibility of this HTML document for ADA Title 2 and "
-                        "WCAG 2.1 AA compliance. Follow these rules strictly:\n\n"
-                        "NEVER allowed:\n"
-                        "- Do not change, add, or remove text inside <p>, <h1>–<h6>, <li>, <td>, "
-                        "<th>, <span>, <a>, <em>, <strong>, or any other body element — "
-                        "not a single word or character\n\n"
-                        "ALLOWED attribute changes:\n"
-                        "- Add or modify: aria-label, aria-labelledby, aria-describedby, "
-                        "aria-hidden, aria-expanded, aria-controls, role, scope, lang, "
-                        "tabindex, headers, for, id\n"
-                        "- Fix heading hierarchy by changing heading levels (h1–h6)\n"
-                        "- Change <td> to <th> where a cell is clearly a column or row header\n\n"
-                        "ALLOWED text additions (these specific elements only):\n"
-                        "- Add a <caption> to a table that lacks one — caption text must be "
-                        "a concise description derived from visible context, not invented\n"
-                        "- Add or update a <figcaption> inside a <figure> that lacks one\n"
-                        "- Update the <title> element to be more descriptive if it is generic\n\n"
+                        "Apply ALL of the following accessibility fixes to this HTML document.\n\n"
+                        "CRITICAL RULE: Do NOT change, remove, or reword any existing body text "
+                        "(paragraphs, headings, list items, table cells). "
+                        "You may add new text only in the specific cases listed below.\n\n"
+                        "## Fix 1 — Skip Navigation (WCAG 2.4.1)\n"
+                        "Add a visually hidden skip link as the first focusable element inside <body>:\n"
+                        '  <a class="skip-link" href="#main-content">Skip to main content</a>\n'
+                        'Add id="main-content" to the <main> element. '
+                        'Add CSS for the skip link in a new <style id="a11y-overrides"> block '
+                        "(do NOT modify the existing <style> block).\n\n"
+                        "## Fix 2 — Heading Hierarchy (WCAG 1.3.1)\n"
+                        "Ensure headings descend without skipping levels. "
+                        "The article title must be h1. Major sections (Abstract, Bibliography, Notes) "
+                        "must be h2. Do not use heading elements for metadata.\n\n"
+                        "## Fix 3 — Abstract Label (WCAG 1.3.1)\n"
+                        "The abstract label must be real DOM text, not a CSS ::before pseudo-element. "
+                        'Add role="region" and aria-labelledby to the abstract container.\n\n'
+                        "## Fix 4 — Focus Visibility (WCAG 2.4.7)\n"
+                        'In the <style id="a11y-overrides"> block, define :focus and :focus-visible '
+                        "styles for all interactive elements. Minimum: "
+                        "outline: 3px solid [accent color]; outline-offset: 3px;\n\n"
+                        "## Fix 5 — Footnote Back-Link Labels (WCAG 2.4.4)\n"
+                        "Footnote return links (e.g. ↑) must have descriptive accessible names. "
+                        'Wrap the glyph in aria-hidden="true" and add '
+                        '<span class="sr-only">Return to footnote reference N</span>. '
+                        'Add the .sr-only utility class in the <style id="a11y-overrides"> block.\n\n'
+                        "## Fix 6 — Language of Parts (WCAG 3.1.2)\n"
+                        "Add lang=\"[BCP 47]\" to any inline passage in a language other than the "
+                        "document lang. Common cases in humanities: de, fr, la, el.\n\n"
+                        "## Fix 7 — Article Landmark Label (WCAG 4.1.2)\n"
+                        'Add aria-labelledby="[h1-id]" to the <article> element. '
+                        "Add a matching id to the <h1>.\n\n"
+                        "## Fix 8 — Table Accessibility (WCAG 1.3.1 / 2.1.1)\n"
+                        "Add scope attributes to <th> elements. "
+                        "Add <caption> to tables that lack one (text derived from visible context). "
+                        "If any table uses :hover, add an equivalent :focus-within rule in "
+                        '<style id="a11y-overrides">.\n\n'
+                        "## Fix 9 — Color Contrast (WCAG 1.4.3)\n"
+                        "If any text color variable fails 4.5:1 contrast against its background "
+                        "(3:1 for large text), override it in "
+                        '<style id="a11y-overrides"> with a value that passes. '
+                        "Pay attention to gold/amber accents and text on tinted backgrounds.\n\n"
                         f"{stripped}"
                     ),
                 }
@@ -185,33 +228,48 @@ def ai_accessibility_pass(html: str) -> tuple[str, str | None]:
         improved = re.sub(r"\n```\s*$", "", improved)
         improved = improved.strip()
 
-    # Hard safety guard: discard output if any body text content changed.
+    # Safety guard: every original word must still appear in the improved
+    # version in order.  New words (skip links, sr-only spans, captions, etc.)
+    # are explicitly allowed; deletions and substitutions are not.
     improved_body = _body_text(improved)
-    if improved_body != original_body:
+    if not _is_subsequence(original_body, improved_body):
         hint = _diff_hint(original_body, improved_body)
         return html, (
-            f"AI accessibility review was discarded: the model modified text content{hint}. "
+            f"AI accessibility review was discarded: original text was removed or changed{hint}. "
             "Original document returned."
         )
 
     return _restore_heavies(improved, images, style_original), None
 
 
-def _diff_hint(before: str, after: str) -> str:
-    """Return a short diagnostic string showing the first word-level difference.
+def _is_subsequence(needle: str, haystack: str) -> bool:
+    """Return True if every word in *needle* appears in *haystack* in order.
 
-    Both strings should already be the output of _body_text() so typographic
-    normalisation has been applied before this comparison.
+    Allows the model to INSERT new text while catching deletions/substitutions.
     """
-    bw = before.split()
-    aw = after.split()
-    for i, (b, a) in enumerate(zip(bw, aw)):
-        if b != a:
-            start = max(0, i - 2)
-            snippet = " ".join(bw[start : i + 3])
-            return f' (near: "{snippet}" → "{a}")'
-    if len(bw) != len(aw):
-        return f" (word count changed: {len(bw)} → {len(aw)})"
+    nw = needle.split()
+    if not nw:
+        return True
+    ni = 0
+    for word in haystack.split():
+        if word == nw[ni]:
+            ni += 1
+            if ni == len(nw):
+                return True
+    return False
+
+
+def _diff_hint(original: str, improved: str) -> str:
+    """Return a diagnostic string identifying the first original word missing from improved."""
+    orig_words = original.split()
+    oi = 0
+    for word in improved.split():
+        if oi < len(orig_words) and word == orig_words[oi]:
+            oi += 1
+    if oi < len(orig_words):
+        start = max(0, oi - 2)
+        snippet = " ".join(orig_words[start : oi + 3])
+        return f' (original text missing near: "{snippet}")'
     return ""
 
 
