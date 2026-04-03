@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hans-Georg Gadamer: "Hilde Domin: Song for Encouragement II" — Translated by Lucas Gronouwe and Alexander Crist</title>
+  <style>
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Design tokens ── */
+  :root {
+    --ink:        #1c2b3a;   /* near-black with a cool undertone            */
+    --ink-light:  #4a5568;   /* secondary text                              */
+    --accent:     #2c5282;   /* ink navy — headings, links, rule accents    */
+    --accent-mid: #4a7fb5;   /* lighter accent for borders                  */
+    --rule:       #d6dde6;   /* subtle dividers                             */
+    --bg-page:    #dde3ea;   /* cool warm-gray page background              */
+    --bg-card:    #ffffff;   /* article card surface                        */
+    --bg-tint:    #f0f4f8;   /* abstract / even-row tint                    */
+    --warm-accent: #b7860b;  /* warm accent for abstract label, top bar     */
+    --font-serif: "Georgia", "Times New Roman", serif;
+    --shadow-card: 0 2px 8px rgba(0,0,0,.08), 0 8px 32px rgba(0,0,0,.06);
+  }
+
+  /* ── Page shell ── */
+  body {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;    /* ≈ 17px — comfortable for long-form reading  */
+    line-height: 1.8;
+    color: var(--ink);
+    background-color: var(--bg-page);
+    /* Subtle linen-like texture via a repeating gradient */
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,.03) 2px,
+      rgba(255,255,255,.03) 4px
+    );
+    min-height: 100vh;
+    padding: 3rem 1rem 6rem;
+  }
+
+  /* ── Article card ── */
+  article {
+    max-width: 960px;          /* ~letter-page width at screen resolution    */
+    margin-inline: auto;
+    background: var(--bg-card);
+    border-radius: 3px;
+    box-shadow: var(--shadow-card);
+    /* Thin gold accent bar across the top */
+    border-top: 4px solid var(--warm-accent);
+    padding: 3.5rem 5rem 4rem;
+  }
+
+  /* ── Headings ── */
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    color: var(--accent);
+    line-height: 1.2;
+    font-weight: normal;       /* Georgia italic/bold weight managed per level */
+  }
+
+  h1.article-title {
+    font-size: 2rem;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+    border-bottom: 2px solid var(--warm-accent);
+    padding-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    font-variant: small-caps;
+    letter-spacing: 0.06em;
+    margin-top: 2.5rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  h3 {
+    font-size: 1.05rem;
+    font-style: italic;
+    margin-top: 1.75rem;
+    margin-bottom: 0.35rem;
+    color: var(--ink-light);
+  }
+
+  h4 {
+    font-size: 1rem;
+    font-style: italic;
+    margin-top: 1.25rem;
+    margin-bottom: 0.25rem;
+    color: var(--ink-light);
+  }
+
+  /* ── Body text ── */
+  p {
+    margin-top: 1rem;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+  /* Indent continuation paragraphs — classic book convention */
+  p + p {
+    text-indent: 1.75em;
+    margin-top: 0;
+  }
+  /* But never indent the first paragraph after a heading */
+  h1 + p, h2 + p, h3 + p, h4 + p { text-indent: 0; }
+
+  /* ── Abstract ── */
+  div.abstract {
+    background: var(--bg-tint);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--warm-accent);
+    border-radius: 0 3px 3px 0;
+    padding: 1.25rem 1.5rem;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  div.abstract p { text-indent: 0; margin-top: 0.5rem; }
+  div.abstract p:first-child { margin-top: 0; }
+  div.abstract::before {
+    content: "Abstract";
+    display: block;
+    font-variant: small-caps;
+    letter-spacing: 0.1em;
+    font-size: 0.78rem;
+    color: var(--warm-accent);
+    margin-bottom: 0.6rem;
+  }
+
+  /* ── Tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    overflow: hidden;   /* clip thead corner radius */
+  }
+  th, td {
+    padding: 0.6rem 1rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  thead th {
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-serif);
+    font-variant: small-caps;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    font-weight: normal;
+    border-bottom: 2px solid var(--accent-mid);
+  }
+  tbody tr { border-bottom: 1px solid var(--rule); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) td { background: var(--bg-tint); }
+  tbody tr:hover td { background: #e6edf5; transition: background 0.15s; }
+
+  /* ── Figures & images ── */
+  figure {
+    margin: 2.5rem 0;
+    text-align: center;
+  }
+  figure img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.10);
+  }
+  figcaption {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--ink-light);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* ── Inline ── */
+  strong { font-weight: bold; color: var(--ink); }
+  em     { font-style: italic; }
+  a      { color: var(--accent); text-underline-offset: 3px; }
+  a:hover { color: var(--warm-accent); }
+
+  /* ── Responsive — collapse padding on small screens ── */
+  @media (max-width: 1020px) {
+    article { padding: 2.5rem 3rem 3rem; }
+  }
+  @media (max-width: 640px) {
+    article { padding: 1.5rem 1.25rem 2rem; }
+    h1.article-title { font-size: 1.5rem; }
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { background: #fff; padding: 0; }
+    article {
+      box-shadow: none;
+      border-top: none;
+      padding: 0;
+      max-width: 100%;
+    }
+    a { color: var(--ink); text-decoration: none; }
+    tbody tr:hover td { background: none; }
+  }
+
+  </style>
+  <style>
+  :root {
+    --accent: #2c8165;
+    --accent-mid: #b5884a;
+    --warm-accent: #0ba3b7;
+  }
+  </style>
+</head>
+<body>
+<main>
+<article>
+<p>"Hilde Domin: Song for Encouragement II" (1966)</p><h1>Hans-Georg Gadamer</h1><table><caption>Translators and Affiliations</caption><tr><th scope="col"><h2>Translated by Lucas Gronouwe</h2><p>Texas A&amp;M University<br /><a href="mailto:Lucas.gronouwe@tamu.edu">Lucas.gronouwe@tamu.edu</a></p><p>ORCID: <a href="https://orcid.org/0000-0003-2903-8654" target="_blank">https://orcid.org/0000-0003-2903-8654</a></p></th><th scope="col"><p><strong>Translated by Alexander Crist</strong></p><p>Pensacola State College<br /><a href="mailto:acrist@pensacolastate.edu">acrist@pensacolastate.edu</a></p><p>ORCID: <a href="https://orcid.org/0000-0002-4772-5450">https://orcid.org/0000-0002-4772-5450</a></p></th></tr><tr><td colspan="2"><h2>DOI: <a href="https://doi.org/10.21423/134jvf48%20">https://doi.org/10.21423/134jvf48 </a></h2></td></tr></table><h2>Abstract</h2><p>In this brief translators' introduction, we first outline the publication history and main themes of Gadamer's 1966 essay ''Hilde Domin: Song for Encouragement II" and its relation to Domin's work. Then, we describe the significance of the essay for ongoing scholarly debates in hermeneutic philosophy on Gadamer and poetics, the hermeneutics of suspicion and trust, and ethics.</p><p><strong>Keywords: </strong>Gadamer, Domin, Hermeneutics, Trust, Language</p><h2>Translator's Introduction: Hermeneutics, Trust, Language</h2><p>Hans-Georg Gadamer's brief essay, "Song for Encouragement II," is the first of three texts in his <em>Gesammelte Werke</em> (Vol. 9) dedicated to the twentieth century German-Jewish poet, Hilde Domin.<sup><sup><a href="#footnote-1" id="footnote-ref-1">[1]</a></sup></sup> The essay was originally published in 1966 in the edited volume: <em>Doppelinterpretationen: Das zeitgenössische deutsche Gedicht zwischen Autor und Leser</em>.<sup><sup><a href="#footnote-2" id="footnote-ref-2">[2]</a></sup></sup> Domin, as the editor of the volume, proposed a rather novel idea for the project. She invited some of the most important post-war German poets to offer a self-interpretation of one of their own poems, which would then appear alongside the interpretation of a contemporary literary critic of this same poem. In a gesture that indicates their familiarity and friendship, it was Gadamer who would have the honor of pairing his interpretation alongside Domin's self-interpretation of "Song for Encouragement II."<sup><sup><a href="#footnote-3" id="footnote-ref-3">[3]</a></sup></sup> </p><p>From the very first lines of this essay, it is clear that Gadamer's attention in this poem is focused on the particular relationship between trust (<em>Vertrauen</em>) and language. Language or linguisticality, as the very medium of hermeneutic experience, plays a foundational role in his philosophical project, as it is in language that we interpret and understand the world and each other. It is little wonder, then, that Gadamer is quite concerned with Domin's depiction of the confusion or distortion of language. When language itself becomes corrupt, our relationship to the world and others becomes fraught, uncertain, and even dangerous: "That the names of things become confused, that the words once valid lose their power—this is probably always the experience that accompanies the collapse of trust. One no longer understands the world when one is no longer surrounded by the protective wall of trusted words." When we lose our trust in language, or when language is no longer trustworthy, we lose ourselves, each other, and the world, as if all at the same time. </p><p>Here Gadamer offers some rare but explicit commentary on the importance of trust for philosophical hermeneutics. After identifying the central line of the poem, "Trust, this most difficult ABC," he explains that trust is something inextricable and sustaining for the linguisticality of our lives: "Is not all our speaking sustained by trust: trust in the other, who understands us, in the words, which everyone knows, in the world, that is present within them?" If trust in language is a condition for the possibility of conversation and understanding, what does it mean when this trust has been lost? If trust operates at such a structural or foundational level, how is one supposed to relearn or return to this kind of trust? While admitting great difficulty and perhaps a long series of disappointing experiences, Gadamer nevertheless affirms the ever-present possibility of trust to be taken up again. However, the return to trust is not a matter that can be grounded on certainty or external verification. Trust, for Gadamer, "is a venture, quiet, imperceptible, unacknowledged." It is always already present as a possibility, even in the most desperate of times. However, one must be ready to start over and begin anew. </p><p>The emphasis here on starting over, on beginning again, on always looking towards a new horizon for hope, is very much in line with many poetic themes that Domin identifies in her own work. Not only would she describe a resilient kind of trust to be the <em>Hauptwort</em> of her life,<sup><sup><a href="#footnote-4" id="footnote-ref-4">[4]</a></sup></sup> she often refers to the poetic word as a form of resistance to the corruption of language and an affirmation of hope in seemingly hopeless circumstances. As her biographer would describe her, Domin would become the poet of the <em>Dennoch</em>,<sup><sup><a href="#footnote-5" id="footnote-ref-5">[5]</a></sup></sup> that is, the one who continues to affirm a hopeful 'nevertheless' or 'still yet.' Domin would take seriously the Confucian dictum to rectify the names of things, to write poetry that is truthful, honest, and avoids all prevarication and duplicity. In this way, poetry for Domin is a "training in truthfulness," which requires exercising a particular kind of civil courage (<em>Zivilcourage</em>) through the proper care for language.<sup><sup><a href="#footnote-6" id="footnote-ref-6">[6]</a></sup></sup> If Gadamer describes Domin as the poet of the return,<sup><sup><a href="#footnote-7" id="footnote-ref-7">[7]</a></sup></sup> it is because in each and every poem, she calls us to return to language and to return to each other, especially in the darkest of times.</p><p>Taken together, Gadamer's engagement with Domin and the thematic resonances between their work open onto broader debates in hermeneutic philosophy. To begin with, the essay provides new insights into Gadamer's poetic engagements. In recent years, scholars have begun to explore the distinctive features of Gadamer's interpretations of German poets such as Paul Celan,<sup><sup><a href="#footnote-8" id="footnote-ref-8">[8]</a></sup></sup> Georg Trakl,<sup><sup><a href="#footnote-9" id="footnote-ref-9">[9]</a></sup></sup> and Rainer Maria Rilke,<sup><sup><a href="#footnote-10" id="footnote-ref-10">[10]</a></sup></sup> complementing earlier work on his reading of Johann Wolfgang von Goethe.<sup><sup><a href="#footnote-11" id="footnote-ref-11">[11]</a></sup></sup> By contrast, Gadamer's reflections on Domin have received comparatively little attention, perhaps in part because they have remained untranslated until now.<sup><sup><a href="#footnote-12" id="footnote-ref-12">[12]</a></sup></sup> Making Gadamer's essay available in English thus opens new avenues for further research on the Gadamer-Domin relationship and brings further attention to Domin as a poet and philosophical thinker in her own right.</p><p>The essay also contributes to contemporary debates about the relation between trust and suspicion in hermeneutics. Gadamer's stance toward the radical interpretive practices associated with ideology critique, psychoanalysis, and the writings of Nietzsche—as theorized by Ricoeur—<sup><sup><a href="#footnote-13" id="footnote-ref-13">[13]</a></sup></sup> is reserved, and his hermeneutics is, by his own admission, far removed from such suspicion.<sup><sup><a href="#footnote-14" id="footnote-ref-14">[14]</a></sup></sup> While the claim that Gadamer's hermeneutics is a hermeneutics of trust has remained largely underdeveloped, it is nevertheless a compelling assertion.<sup><sup><a href="#footnote-15" id="footnote-ref-15">[15]</a></sup></sup> This essay, with its explicit focus on the interconnection of hermeneutics, trust, and language, not only affirms but also substantiates this claim. Indeed, this essay on Domin lends strong support to recent efforts to resuscitate Gadamer's hermeneutics of trust as a counterweight to the suspicious interpretive practices that scholars claim to be dominant in the humanities today.<sup><sup><a href="#footnote-16" id="footnote-ref-16">[16]</a></sup></sup> </p><p>Finally, Gadamer's 1966 essay on Domin offers an additional resource for contemporary hermeneutics scholars who focus on ethical and socio-political issues. In arguing for the cultivation of trust in times of crisis, Gadamer speaks directly to recent discussions of hermeneutics in relation to responsibility, solidarity, and socio-political challenges.<sup><sup><a href="#footnote-17" id="footnote-ref-17">[17]</a></sup></sup> More specifically, the essay helps illuminate what it might mean to regard trust as a distinctive Gadamerian virtue—alongside openness, charity, humility, and good will.<sup><sup><a href="#footnote-18" id="footnote-ref-18">[18]</a></sup></sup> Indeed, in a world marked by an ever-growing lack of trust in social, political, and academic institutions, Gadamer's reflections on the loss and return of trust in times of crisis are perhaps more relevant today than ever.</p><h2>[Gadamer's Text]</h2><p>Long were you chased around the doorless</p><p>walls of the city.</p><p>You flee and scatter</p><p>the confused names of things</p><p>behind you.</p><p>Trust, this most difficult</p><p>ABC.</p><p>I make a small sign</p><p>in the air,</p><p>invisible,</p><p>where the new city begins,</p><p>Jerusalem,</p><p>the golden one,</p><p>out of nothing.</p><p>No word stands alone. No word begins with itself. One has always already listened. One has always already said something. One always still has something to say. Even the words of a poem are not pure information that has made its way into a written record. They are like signs and beckonings, pointing into the open. If the brief lines we read here were not accompanied by other "songs for encouragement," they would still not stand alone.<sup><sup><a href="#footnote-19" id="footnote-ref-19">[19]</a></sup></sup> They belong to a context of meaning that has almost something like a unified theme. To be sure, it is a poetic context. Imagery, gestural language, metaphors (as we so call them) are placed side by side, as if they followed from one another. In truth, they gravitate against one another and form the field of an experience. The line that names this experience stands at the center of the poem: "Trust, this most difficult ABC."</p><p>One immediately asks: Is trust something that one must first learn? Can one learn it, as one learns to write? As if one could live at all without trust. Is not all our speaking sustained by trust: trust in the other, who understands us, in the words, which everyone knows, in the world, that is present within them? And yet, here trust is named as something that must be learned, from the very beginning. How must it have been lost, this most elementary thing, which underlies all abiding in life, every abiding speech—the ABC. Can one simply relearn it? As something not yet known or as something forgotten? Are not the walls, along which one searches, without doors? Indeed, it is the most difficult ABC—that one again and again forgets, that one again and again loses. How is one to learn it?</p><p>The first part of the poem describes the loss of trust. The second part describes the beginning of its return. The first part uses the second-person form ["you"], the second part the first-person ["I"]—surely not by chance. It is the same lyrical self that at first addresses itself as if it were another—indeed, is it not someone else, always, to whom trust in life has been lost?—and then—quietly—confesses something to itself, and in so doing, begins once again to come back into accord with itself.</p><p>The image that the poem evokes at the outset, that of being hunted (though it is not quite clear yet by whom), calls to mind one of the great, terrifying scenes of the <em>Iliad</em>, in which Achilles chases the death-stricken Hector around the walls of Troy, and no saving door receives him. The desperate flight of this bravest man is there in the opening lines, but immediately transformed and intensified. One is first struck by the phrase "doorless walls."<sup><sup><a href="#footnote-20" id="footnote-ref-20">[20]</a></sup></sup> These are not walls whose gates remain locked and inaccessible, but walls along which you seek a door and find none, no way to let you in or out of the "city of trust," of the trusted world. One is struck again: here, no seemingly helpful friend comes to the fugitive's aid, allowing him to master his fear and face the fight<sup><sup><a href="#footnote-21" id="footnote-ref-21">[21]</a></sup></sup>—here, there is no visible enemy one could confront and stand against. The one who flees here has thrown away all weapons. For he has cast behind him the names of things, because they are "confused" and are no longer fit to serve. This is what first gives the entire image of the flight its radical significance. The confusion of the names of things signifies the greatest danger and the utmost defenselessness. We know not only from Laozi that he would begin with the rectification of names were he to govern,<sup><sup><a href="#footnote-22" id="footnote-ref-22">[22]</a></sup></sup> and not only that Thucydides describes the corrosion of plague-stricken Athens through the transformation of word meanings.<sup><sup><a href="#footnote-23" id="footnote-ref-23">[23]</a></sup></sup> We know the monstrous corruption of concepts brought about by the demagogues of all eras. And perhaps even this is too narrow a view. That the names of things become confused, that the words once valid lose their power—this is probably always the experience that accompanies the collapse of trust. One no longer understands the world when one is no longer surrounded by the protective wall of trusted words. </p><p>This is the meaning of the Homeric metaphor in these verses: the city of trust, in which alone one can remain and live, has become inaccessible—indeed, does it still exist at all behind the walls of rejection around which we are being hunted?</p><p>Here one notes the shift in tense. The hunt appears in the past tense, introduced by "long," the far-shining facade [<em>τηλανγὲς πρόσωπον</em>] of the poem,<sup><sup><a href="#footnote-24" id="footnote-ref-24">[24]</a></sup></sup> which already points to the transformation about to unfold. And yet it continues in the present tense, the fleeing and casting away of the names. Not merely, I think, to make the desperate flight seem vividly present, but because this life's constant flight, this chase from disappointment to disappointment, does not come to an end all at once. It continues wherever communication and trust fail.</p><p>Conversely, one must not ask how the poem suddenly arrives at the learning to trust. It does not arrive there suddenly. Trust is always there, always necessary. Even where it is shattered, it is there, as that which one must try to learn anew. But it is likewise true that this relearning of trust is not an innocent-confident new beginning, which, after having suffered all disappointments and tasted all despair, begins by gradually learning the letters of trust—trust is a venture, quiet, imperceptible, unacknowledged. <a id="_Hlk209857995"></a>What counts is to begin to trust [<em>Vertrauen zu fassen</em>]. This turn of phrase in our language contains everything that the poem sensuously evokes. <a id="_Hlk209858048"></a>What constantly escapes one, in which one is repeatedly deceived, in which one fails again and again—quietly it nonetheless returns. There is never any proof to which trust can appeal. It is not a familiar letter and a sequence of letters that everyone recognizes, with which the relearning of trust begins. Trust is "signs in the air," perceptible to no one else, not showable, scarcely even conscious to oneself—and yet these signs, dared in utmost ephemerality, are full of reference, full of beginning, full of an initial sense of abiding.</p><p>That the new city of trust is built "out of nothing" is self-evident, if trust is truly to be trust and not well-founded certainty. That it gleams in the "golden" shimmer of an eternal anticipation, a heavenly Jerusalem, places the final seal on the truth contained in these verses. One cannot live without trust, without <a id="_Hlk209858104"></a>familiarity [<em>Vertrautheit</em>] all around, and without that ultimate intimacy [<em>Vertraulichkeit</em>] with oneself, that allows one to say "I" and to be an I.</p><ol><li id="footnote-1"><p> Hans-Georg Gadamer, <a id="_Hlk209530789"></a>"Hilde Domin, Lied zur Ermutigung II," in <em>Ästhetik und Poetik II: Hermeneutik im Vollzug</em>, <em>Gesammelte Werke</em>, vol. 9 (Mohr Siebeck, 1993), 320–22. Published here with permission. We would like to thank Theodore George, Gert-Jan van der Heiden, Tobias Keiling, and two anonymous reviewers for their valuable comments and suggestions on various aspects of this translation. <a href="#footnote-ref-1">↑</a></p></li><li id="footnote-2"><p> Hilde Domin, <a id="_Hlk209530606"></a><em>Doppelinterpretationen: Das zeitgenössische deutsche Gedicht zwischen Autor und Leser</em>, ed. Hilde Domin<em> </em>(Athenaum, 1966). <a href="#footnote-ref-2">↑</a></p></li><li id="footnote-3"><p> Domin, <a id="_Hlk209533194"></a>"Lied zur Ermutigung II: Selbstinterpretation," in <em>Gesammelte Essays: Heimat in der Sprache</em> (Piper, 1992), 388–94. <a href="#footnote-ref-3">↑</a></p></li><li id="footnote-4"><p> Hilde Domin, <a id="_Hlk209531206"></a>"Vorwort," in <em>Gesammelte Essays: Heimat in der Sprache</em> (Piper, 1992), 11. <a href="#footnote-ref-4">↑</a></p></li><li id="footnote-5"><p> Ilke Scheidgen, <a id="_Hlk209531374"></a><em>Hilde Domin: Dichterin des Dennoch</em> (Kaufmann Verlag, 2015). <a href="#footnote-ref-5">↑</a></p></li><li id="footnote-6"><p> Domin, <a id="_Hlk209531306"></a>"Zivilcourage: ein Fremdwort," in <em>Gesammelte Essays: Heimat in der Sprache</em> (Piper, 1992), 238. <a href="#footnote-ref-6">↑</a></p></li><li id="footnote-7"><p> Hans-Georg Gadamer, "<em>Hilde Domin</em>, <em>Dichterin der Rückkehr,</em>" in <em>Ästhetik und Poetik II: Hermeneutik</em></p><p><em>im Vollzug, Gesammelte Werke</em>, vol. 9 (Mohr Siebeck, 1993), 323–328. <a href="#footnote-ref-7">↑</a></p></li><li id="footnote-8"><p> Gert-Jan van der Heiden, ''An 'Almost Imperceptible Breathturn:' Gadamer on Celan,'' in <em>Philosophers and Their Poets: Reflections on the Poetic Turn in Philosophy since Kant</em>, ed. Charles Bambach and Theodore George (SUNY Press, 2019), 215–237; Gert-Jan van der Heiden, ''Poem, dialogue and witness: Gadamer's reading of Paul Celan,'' in <em>The Gadamerian Mind</em>, ed. Theodore George and Gert-Jan van der Heiden (Routledge, 2022), 318–332.  <a href="#footnote-ref-8">↑</a></p></li><li id="footnote-9"><p> Ian Alexander Moore, "'The Pealing of Stillness': Gadamer on Georg Trakl," <em>Journal of Continental Philosophy</em> 3, no. 1/2 (2022): 67–85. <a href="#footnote-ref-9">↑</a></p></li><li id="footnote-10"><p> Simona Venezia, ''Interpreting Pain: Gadamer on Rilke,'' <em>META: Research in Hermeneutics, Phenomenology, and Practical Philosophy </em>XI, no. 2 (2019): 725–745.  <a href="#footnote-ref-10">↑</a></p></li><li id="footnote-11"><p> John Pizer, ''Gadamer's Reading of Goethe,'' <em>Philosophy and Literature</em> 15, no. 2 (1991): 268–277. <a href="#footnote-ref-11">↑</a></p></li><li id="footnote-12"><p> Alexander Crist, ''A Hermeneutics and Poetics of Trust: Gadamer and Domin on Trust and Language,'' <em>Analecta Hermeneutica</em> 14, no. 3 (2022): 139–158. <a href="#footnote-ref-12">↑</a></p></li><li id="footnote-13"><p> Paul Ricoeur, <em>Freud and Philosophy: An Essay on Interpretation</em>, trans. Denis Savage (Yale University Press, 1970).  <a href="#footnote-ref-13">↑</a></p></li><li id="footnote-14"><p> Hans-Georg Gadamer, ''The Hermeneutics of Suspicion,'' <em>Man and World </em>17 (1984): 313–323; Gadamer, ''Reply to My Critics,'' in <em>The Hermeneutic Tradition: From Ast to Ricoeur</em>, ed. Gayle L. Ormiston and Alan D. Schrift (SUNY Press, 1990), 273–297; Jacques Derrida, Hans-Georg Gadamer, and Philippe Lacoue-Labarthe, <em>Heidegger, Philosophy, and Politics: The Heidelberg Conference</em>, ed. Mireille Calle-Gruber, trans. Jeff Fort (Fordham University Press, 2016), 8.  <a href="#footnote-ref-14">↑</a></p></li><li id="footnote-15"><p> For more on a hermeneutics of trust in Gadamer's works, see Robert J. Dostal, "The World Never Lost: The Hermeneutics of Trust,'' <em>Philosophy and Phenomenological Research </em>XLVII, no. 3 (1987): 413–434. <a href="#footnote-ref-15">↑</a></p></li><li id="footnote-16"><p> Rita Felski, <em>The Limits of Critique</em> (University of Chicago Press, 2015); ''Postcritique: Past Influences and Present Conjunctures,'' <em>Media Theory</em> 7, no. 1 (2023): 329–342; Lucas Gronouwe, ''Towards a Postcritical Hermeneutics: Reconsidering Tradition and Critique in Gadamer,'' <em>META: Research in Hermeneutics, Phenomenology, and</em> <em>Practical Philosophy</em> XVII, no. 1 (2025): 127–151.  <a href="#footnote-ref-16">↑</a></p></li><li id="footnote-17"><p> See, e.g., Theodore George, <em>The Responsibility to Understand: Hermeneutical Contours of Ethical Life </em>(Edinburgh University Press, 2020); Cynthia Nielsen, ''Gadamer and Scholz on Solidarity: Disclosing, Avowing, and Performing Solidaristic Ties with Human and Natural Others,'' <em>Journal of the British Society for Phenomenology </em>48, no. 3 (2017): 240–256; Jennifer Gaffney, "Solidarity in dark times: Arendt and Gadamer on the politics of appearance," <em>Philosophy Compass </em>13, no. 12 (2018): 1–13; Georgia Warnke, ''Gadamer on Solidarity,'' in <em>The Gadamerian Mind</em>, ed. Theodore George and Gert-Jan van der Heiden (Routledge, 2022), 78–89; Alexander Crist, ''What is Anti-Hermeneutics? Karl Jaspers, Hans-Georg Gadamer, and the COVID-19 Hermeneutic Crisis,'' <em>Existenz</em> 18, no. 2 (2023): 25–36. <a href="#footnote-ref-17">↑</a></p></li><li id="footnote-18"><p> Robert J. Dostal, <em>Gadamer's Hermeneutics: Between Phenomenology and Dialectic</em> (Northwestern University Press, 2022), 82; Haley Irene Burke, ''Developing Gadamerian Virtues Against Epistemic Injustice: The Epistemic and Hermeneutical Dimensions of Ethics,'' <em>Journal of Applied</em> <em>Hermeneutics </em>(2022): 1–10; Alexander Crist, ''Hermeneutic Virtue and Moral Masquerading: Gadamer and the Question of Solidarity in Melville's The Confidence-Man,'' <em>Analecta Hermeneutica</em> 16 (2024): 27–49. <a href="#footnote-ref-18">↑</a></p></li><li id="footnote-19"><p> There is a total of three poems in Hilde Domin's "Songs for Encouragement" triptych. See Hilde Domin, <em>Rückkehr der Schiffe</em> (S. Fischer, 1962), 59-61. <a href="#footnote-ref-19">↑</a></p></li><li id="footnote-20"><p> For this quoted phrase, Gadamer himself adds a footnote referring to page 332 of <em>Gesammelte Werke</em>, vol. 9, which directs the reader to his third essay on Hilde Domin in the same volume. See Hans-Georg Gadamer, "<em>Die Höhe erreichen: Hilde Domins Frankfurter Poetik-Vorlesungen</em>," in <em>Ästhetik und Poetik II: Hermeneutik im Vollzug</em>, <em>Gesammelte Werke</em>, vol. 9 (Mohr Siebeck, 1993), 332.  <a href="#footnote-ref-20">↑</a></p></li><li id="footnote-21"><p> In Book 22 of Homer's <em>Iliad</em>, Athena appears to Hector in the form of his brother, Deiphobus, in order to encourage him to stand and fight Achilles. Athena's act, however, was one of subterfuge. Hector's fate had already been decided, and her deception provides Hector with a false sense of confidence in facing Achilles. Hector recognizes this trickery shortly before his death at the hands of Achilles. <a href="#footnote-ref-21">↑</a></p></li><li id="footnote-22"><p> While Gadamer names Laozi in this passage, the rectification of names is a concept much more closely associated with Confucius. Hilde Domin likewise refers to Confucius and the rectification of names at several points throughout her own essays and lectures. See Confucius, <em>Analects</em>, trans. David Hinton (Counterpoint, 2014), XIII, 3; Hilde Domin, "<em>Zur Lesepraxis</em>," in <em>Das Gedicht als Augenblick von Freiheit</em>: <em>Frankfurter Poetik-Vorlesungen 1987/1988 </em>(Piper, 1988), 93–94.  <a href="#footnote-ref-22">↑</a></p></li><li id="footnote-23"><p> While Thucydides describes the moral degradation that takes place during the plague of Athens, it is in his account of the revolution in the city-state of Corcyra that one can find several passages on the transformation of word meanings in a society experiencing a violent downfall. See Thucydides, <em>The Peloponnesian War</em>, 3.82.4, 3.83.1-2.  <a href="#footnote-ref-23">↑</a></p></li><li id="footnote-24"><p> The Greek phrase <em>tēlauges prosōpon</em> originates in Pindar, <em>Olympian Odes</em> 6.4, where it describes the radiant opening that ought to begin a (poetic) work.  <a href="#footnote-ref-24">↑</a></p></li></ol>
+</article>
+</main>
+</body>
+</html>
