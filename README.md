@@ -45,6 +45,7 @@ exceeds 1.6× the median line spacing on that page.
 
 **HTML output is always valid and accessible:**
 - `<html lang="...">` and `<title>` on every document (WCAG 2.4.2 / 3.1.1)
+- `<main>` landmark wrapping content (WCAG 1.3.6)
 - Empty `<th>` elements converted to `<td>` (ADA Title II / WCAG 1.3.1)
 - Self-contained — no external assets, images embedded as data-URIs
 
@@ -56,6 +57,17 @@ exceeds 1.6× the median line spacing on that page.
 ```bash
 brew install pandoc   # macOS
 ```
+
+### Optional: AI features
+
+The AI alt text and AI accessibility review features require the `anthropic` package (included as a dependency) and an 
+API key in the environment:
+
+```bash
+export CLAUDE_API=your-api-key-here
+```
+
+Without this variable set, both AI features are silently skipped and the standard output is returned.
 
 ## Installation
 
@@ -125,16 +137,43 @@ Mammoth warnings (e.g. unmapped Word styles) are written to stderr and do not ap
 from ojsgalleon import pdf_to_html, pdf_to_jats, docx_to_html, docx_to_jats
 
 html, warnings = docx_to_html(Path("paper.docx").read_bytes())
-html            = pdf_to_html(Path("paper.pdf").read_bytes())
+html, warnings = pdf_to_html(Path("paper.pdf").read_bytes())
 jats            = pdf_to_jats(Path("paper.pdf").read_bytes())
 jats            = docx_to_jats(Path("paper.docx").read_bytes())
 ```
 
-### API server
+Both `pdf_to_html` and `docx_to_html` return a `(html: str, warnings: list[str])` tuple. Warnings include any issues reported by mammoth (DOCX) or the AI passes when enabled.
+
+**Optional parameters for `pdf_to_html` and `docx_to_html`:**
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `lang` | `str` | `"en"` | BCP 47 language tag for `html[lang]` |
+| `style_overrides` | `dict[str, str] \| None` | `None` | CSS variable overrides, e.g. `{"--accent": "#c0392b"}` |
+| `improve_accessibility` | `bool` | `False` | Run AI accessibility review (requires `CLAUDE_API`) |
+
+`pdf_to_html` also accepts:
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `generate_alt_text` | `bool` | `False` | Generate alt text for images with Claude Haiku (requires `CLAUDE_API`) |
+
+### Web UI
 
 ```bash
 ojsgalleon serve
 ```
+
+Then open http://localhost:8000 in your browser. The UI supports:
+
+- Drag-and-drop or click-to-browse file upload
+- Output format selection (HTML or JATS XML)
+- Language tag input
+- **AI alt text** — generate image descriptions with Claude Haiku (PDF only; requires `CLAUDE_API`)
+- **AI accessibility review** — post-process the HTML with Claude Sonnet to apply WCAG 2.1 AA / ADA Title II fixes including skip navigation, heading hierarchy, focus styles, footnote labels, language tagging, and color contrast (HTML only; requires `CLAUDE_API`)
+- **Galley styles** — a collapsible color picker panel to customize the six main CSS design tokens before converting
+
+### API server
 
 Interactive docs: http://localhost:8000/docs
 
@@ -171,12 +210,13 @@ curl -X POST http://localhost:8000/api/convert \
 ```
 src/ojsgalleon/
 ├── __init__.py          # public API
-├── api.py               # FastAPI app
+├── api.py               # FastAPI app + REST endpoint
+├── ui.py                # Web UI (HTMX + Tailwind) + /ui/convert endpoint
 ├── cli.py               # CLI (subcommands: convert, serve)
 └── converters/
     ├── docx.py          # DOCX → HTML (mammoth) / JATS (pandoc)
     ├── pdf.py           # PDF → HTML or JATS (pdfplumber + pymupdf)
-    └── html_wrap.py     # Wraps fragments in a valid, styled HTML5 document
+    └── html_wrap.py     # HTML wrapper, CSS design tokens, AI accessibility pass
 ```
 
 ## Tuning PDF extraction
