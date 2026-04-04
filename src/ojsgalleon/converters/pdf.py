@@ -45,7 +45,7 @@ def _generate_alt_text(b64: str, ext: str) -> str:
     client = anthropic.Anthropic(api_key=api_key)
     message = client.messages.create(
         model="claude-haiku-4-5-20251001",
-        max_tokens=256,
+        max_tokens=50,
         messages=[
             {
                 "role": "user",
@@ -56,7 +56,11 @@ def _generate_alt_text(b64: str, ext: str) -> str:
                     },
                     {
                         "type": "text",
-                        "text": "Describe this image concisely for use as HTML alt text. Respond with only the description, no preamble.",
+                        "text": (
+                            "Write alt text for this image in 100 characters or fewer. "
+                            "Be specific but succinct — describe what the image shows, not how it looks. "
+                            "Respond with only the alt text, no punctuation at the end, no preamble."
+                        ),
                     },
                 ],
             }
